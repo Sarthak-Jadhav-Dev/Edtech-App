@@ -12,108 +12,239 @@ class _HomeSectionState extends State<HomeSection> {
   final AuthService _authService = AuthService();
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Column(
-          children: [
-            ClipRRect(
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(6.0),
+            child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Container(
-                color: Colors.deepPurpleAccent.shade100,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                color: Colors.purple.shade300,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(12.0),
+                      child: Row(
                         children: [
-                          Text(
-                            "Welcome,",
-                            style: TextStyle(fontFamily: "Sans"),
-                          ),
-                          Text(
-                            "Sarthak !",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: "Sans",
-                            ),
-                          ),
-                        ],
-                      ),
-                      ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          shape: const CircleBorder(),
-                          padding: EdgeInsets.all(16),
-                        ),
-                        child: Icon(Icons.search),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 10),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                color: Colors.deepPurpleAccent.shade100,
-                width: double.infinity,
-                height: 100,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Continue Learning Today...",
-                        style: TextStyle(fontFamily: "Sans", fontSize: 20),
-                      ),
-                      SizedBox(height: 5),
-                      Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.all(Radius.circular(20)),
-                            child: Container(
-                              height: 50,
-                              width: 120,
-                              color: Colors.deepPurpleAccent.shade700,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.pages, color: Colors.white),
-                                  Text(
-                                    "Learn",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ],
+                          Icon(Icons.book_sharp),
+                          SizedBox(width: 20),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Welcome Learner!",
+                                style: TextStyle(fontSize: 15, fontFamily: "Sans"),
                               ),
+                              Text(
+                                "Sarthak",
+                                style: TextStyle(fontSize: 22, fontFamily: "Sans"),
+                              ),
+                            ],
+                          ),
+                          SizedBox(width: 50),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.purple.shade200,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: IconButton(
+                              onPressed: () {},
+                              icon: Icon(Icons.notifications),
                             ),
                           ),
-                          OutlinedButton(
-                            onPressed: () async{
-                              await _authService.logout();
-                            },
-                            style: OutlinedButton.styleFrom(
-                              shape: const StadiumBorder(),
+                          SizedBox(width: 1),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.purple.shade200,
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            child: Text("Logout"),
+                            child: IconButton(
+                              onPressed: () {},
+                              icon: Icon(Icons.person),
+                            ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                    SizedBox(
+                      width: 320,
+                      child: TextField(
+                        autofocus: false,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          filled: true,
+                          fillColor: Colors.white60,
+                          hintText: "Search Courses",
+                          hintStyle: TextStyle(fontFamily: "Poppins"),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    SizedBox(
+                      height: 150,
+                      width: 320,
+                      child: Row(
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Your Solution, One",
+                                style: TextStyle(fontSize: 20, fontFamily: "Poppins"),
+                              ),
+                              Text(
+                                "Tap Away!",
+                                style: TextStyle(fontSize: 20, fontFamily: "Poppins"),
+                              ),
+                              Text(
+                                "Seamless, Fast and Reliable",
+                                style: TextStyle(fontSize: 12, fontFamily: "Sans"),
+                              ),
+                              Text(
+                                "Services at your Fingertips",
+                                style: TextStyle(fontSize: 12, fontFamily: "Sans"),
+                              ),
+                              SizedBox(height: 7),
+                              OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: Colors.white70,
+                                  side: BorderSide(color: Colors.white70, width: 1),
+                                  shape: StadiumBorder(),
+                                ),
+                                onPressed: () {},
+                                child: Text(
+                                  "Explore",
+                                  style: TextStyle(fontFamily: "Sans"),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Continue Learning", style: TextStyle(
+                        fontSize: 18,
+                        fontFamily: "Poppins"
+                    ),),
+                    MaterialButton(
+                      onPressed: (){},
+                      child: Text("View all>",style: TextStyle(color: Colors.blue),),
+                    )
+                  ],
+                ),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 190,
+                        child: Image.asset("assets/images/HappyFaces.png"),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      SizedBox(
+                        width: 190,
+                        child: Image.asset("assets/images/HappyFaces.png"),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Your Courses", style: TextStyle(
+                        fontSize: 18,
+                        fontFamily: "Poppins"
+                    ),),
+                    MaterialButton(
+                      onPressed: (){},
+                      child: Text("View all>",style: TextStyle(color: Colors.blue),),
+                    )
+                  ],
+                ),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 190,
+                        child: Image.asset("assets/images/HappyFaces.png"),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      SizedBox(
+                        width: 190,
+                        child: Image.asset("assets/images/HappyFaces.png"),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Pending Assignments", style: TextStyle(
+                        fontSize: 18,
+                        fontFamily: "Poppins"
+                    ),),
+                    MaterialButton(
+                      onPressed: (){},
+                      child: Text("View all>",style: TextStyle(color: Colors.blue),),
+                    )
+                  ],
+                ),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 190,
+                        child: Image.asset("assets/images/HappyFaces.png"),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      SizedBox(
+                        width: 190,
+                        child: Image.asset("assets/images/HappyFaces.png"),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

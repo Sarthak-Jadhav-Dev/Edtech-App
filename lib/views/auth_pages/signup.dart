@@ -20,6 +20,7 @@ class _RegisterFormState extends State<RegisterForm> {
   final TextEditingController _lastName = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
+  final TextEditingController _confirmPassword = TextEditingController();
 
   @override
   void dispose() {
@@ -36,6 +37,8 @@ class _RegisterFormState extends State<RegisterForm> {
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.purple.shade50,
       appBar: AppBar(
+        title: Text("Get Started..", style: TextStyle(fontFamily: "Poppins")),
+        centerTitle: true,
         backgroundColor: Colors.transparent,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         elevation: 0,
@@ -52,8 +55,7 @@ class _RegisterFormState extends State<RegisterForm> {
       extendBodyBehindAppBar: true,
       body: SafeArea(
         child: SingleChildScrollView(
-          keyboardDismissBehavior:
-          ScrollViewKeyboardDismissBehavior.onDrag,
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Column(
             children: [
               const SizedBox(height: 20),
@@ -63,9 +65,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   padding: const EdgeInsets.all(12.0),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
-                    child: Image.asset(
-                      'assets/images/HappyFaces.png',
-                    ),
+                    child: Image.asset('assets/images/HappyFaces.png'),
                   ),
                 ),
               ),
@@ -73,7 +73,9 @@ class _RegisterFormState extends State<RegisterForm> {
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 25),
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.purple.shade50,
                   borderRadius: BorderRadius.circular(40),
@@ -95,8 +97,7 @@ class _RegisterFormState extends State<RegisterForm> {
                         onPressed: () {},
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size(300, 50),
-                          side: const BorderSide(
-                              color: Colors.black, width: 1),
+                          side: const BorderSide(color: Colors.black, width: 1),
                           shape: const StadiumBorder(),
                           backgroundColor: Colors.purple.shade50,
                         ),
@@ -105,7 +106,6 @@ class _RegisterFormState extends State<RegisterForm> {
                           style: TextStyle(fontFamily: "Sans"),
                         ),
                       ),
-
                       const SizedBox(height: 10),
                       const Text("or"),
                       const SizedBox(height: 10),
@@ -120,9 +120,7 @@ class _RegisterFormState extends State<RegisterForm> {
                                   filled: true,
                                   fillColor: Colors.white60,
                                   hintText: "First Name",
-                                  hintStyle: TextStyle(
-                                    fontFamily: "Sans",
-                                  ),
+                                  hintStyle: TextStyle(fontFamily: "Sans"),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.only(
                                       topLeft: Radius.circular(40),
@@ -132,8 +130,7 @@ class _RegisterFormState extends State<RegisterForm> {
                                   ),
                                 ),
                                 validator: (value) {
-                                  if (value == null ||
-                                      value.isEmpty) {
+                                  if (value == null || value.isEmpty) {
                                     return "Enter first name";
                                   }
                                   return null;
@@ -148,9 +145,7 @@ class _RegisterFormState extends State<RegisterForm> {
                                   filled: true,
                                   fillColor: Colors.white60,
                                   hintText: "Last Name",
-                                  hintStyle: TextStyle(
-                                    fontFamily: "Sans"
-                                  ),
+                                  hintStyle: TextStyle(fontFamily: "Sans"),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.only(
                                       topRight: Radius.circular(40),
@@ -160,8 +155,7 @@ class _RegisterFormState extends State<RegisterForm> {
                                   ),
                                 ),
                                 validator: (value) {
-                                  if (value == null ||
-                                      value.isEmpty) {
+                                  if (value == null || value.isEmpty) {
                                     return "Enter last name";
                                   }
                                   return null;
@@ -171,10 +165,7 @@ class _RegisterFormState extends State<RegisterForm> {
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 10),
-
-                      /// EMAIL
                       SizedBox(
                         width: 300,
                         child: TextFormField(
@@ -183,18 +174,14 @@ class _RegisterFormState extends State<RegisterForm> {
                             filled: true,
                             fillColor: Colors.white60,
                             hintText: "Email",
-                            hintStyle: TextStyle(
-                              fontFamily: "Sans"
-                            ),
+                            hintStyle: TextStyle(fontFamily: "Sans"),
                             border: OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(40),
+                              borderRadius: BorderRadius.circular(40),
                               borderSide: BorderSide.none,
                             ),
                           ),
                           validator: (value) {
-                            if (value == null ||
-                                value.isEmpty) {
+                            if (value == null || value.isEmpty) {
                               return "Enter email";
                             }
                             return null;
@@ -211,18 +198,14 @@ class _RegisterFormState extends State<RegisterForm> {
                             filled: true,
                             fillColor: Colors.white60,
                             hintText: "Password",
-                            hintStyle: TextStyle(
-                              fontFamily: "Sans"
-                            ),
+                            hintStyle: TextStyle(fontFamily: "Sans"),
                             border: OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(40),
+                              borderRadius: BorderRadius.circular(40),
                               borderSide: BorderSide.none,
                             ),
                           ),
                           validator: (value) {
-                            if (value == null ||
-                                value.isEmpty) {
+                            if (value == null || value.isEmpty) {
                               return "Enter password";
                             }
                             if (value.length < 6) {
@@ -232,12 +215,38 @@ class _RegisterFormState extends State<RegisterForm> {
                           },
                         ),
                       ),
-
+                      SizedBox(
+                        height: 10,
+                      ),
+                      SizedBox(
+                        width: 300,
+                        child: TextFormField(
+                          controller: _confirmPassword,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white60,
+                            hintText: "Confirm Password",
+                            hintStyle: TextStyle(fontFamily: "Sans"),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(40),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Enter password";
+                            }
+                            if (value.length < 6) {
+                              return "Min 6 characters";
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
                       const SizedBox(height: 15),
-
-                      /// REGISTER BUTTON
                       OutlinedButton(
-                        onPressed: () async{
+                        onPressed: () async {
                           if (!_formKey.currentState!.validate()) return;
 
                           final user = await _authService.signUp(
@@ -246,33 +255,34 @@ class _RegisterFormState extends State<RegisterForm> {
                           );
 
                           if (user != null) {
-                            // ✅ Mark app as not first time
                             await AppState.setNotFirstTime();
-
                             if (!mounted) return;
-
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(builder: (_) => WidgetTree()),
                             );
-                          } else {
-                            // ❌ Error
+                          } else if (_password.text != _confirmPassword.text) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Registration Failed")),
+                              const SnackBar(
+                                content: Text("Passwords do not match"),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Registration Failed"),
+                              ),
                             );
                           }
                         },
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size(300, 50),
                           shape: const StadiumBorder(),
-                          backgroundColor:
-                          Colors.purple.shade900,
+                          backgroundColor: Colors.purple.shade900,
                         ),
                         child: const Text(
                           "Register",
-                          style: TextStyle(
-                            color: Colors.white70,
-                          ),
+                          style: TextStyle(color: Colors.white70),
                         ),
                       ),
 
@@ -284,8 +294,8 @@ class _RegisterFormState extends State<RegisterForm> {
                           "Registering means you agree to Terms & Privacy Policy",
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              color: Colors.black54,
-                            fontFamily: "Sans"
+                            color: Colors.black54,
+                            fontFamily: "Sans",
                           ),
                         ),
                       ),

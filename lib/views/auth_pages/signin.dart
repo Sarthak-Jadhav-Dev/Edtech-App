@@ -33,6 +33,8 @@ class _LoginFormState extends State<LoginForm> {
       backgroundColor: Colors.purple.shade50,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        title: Text("Get Started..",style: TextStyle(fontFamily: "Poppins"),),
+        centerTitle: true,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         elevation: 0,
         leading: IconButton(
@@ -53,8 +55,6 @@ class _LoginFormState extends State<LoginForm> {
           child: Column(
             children: [
               const SizedBox(height: 20),
-
-              /// 🔝 TOP IMAGE
               Hero(
                 tag: 'Hello',
                 child: Padding(
@@ -67,15 +67,11 @@ class _LoginFormState extends State<LoginForm> {
                   ),
                 ),
               ),
-
-              const SizedBox(height: 10),
-
-              /// 🔽 FORM CONTAINER (NO POSITIONED ❌)
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 25),
+                    horizontal: 20, vertical: 12),
                 decoration: BoxDecoration(
                   color: Colors.purple.shade50,
                   borderRadius: BorderRadius.circular(40),
@@ -90,10 +86,7 @@ class _LoginFormState extends State<LoginForm> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
                     const SizedBox(height: 10),
-
-                    /// GOOGLE BUTTON
                     OutlinedButton(
                       onPressed: () {},
                       style: OutlinedButton.styleFrom(
