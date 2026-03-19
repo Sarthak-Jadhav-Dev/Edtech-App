@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../services/auth_services.dart';
 
 class HomeSection extends StatefulWidget {
   const HomeSection({super.key});
@@ -8,12 +9,13 @@ class HomeSection extends StatefulWidget {
 }
 
 class _HomeSectionState extends State<HomeSection> {
+  final AuthService _authService = AuthService();
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: SingleChildScrollView(
-        scrollDirection:Axis.vertical,
+        scrollDirection: Axis.vertical,
         child: Column(
           children: [
             ClipRRect(
@@ -30,25 +32,25 @@ class _HomeSectionState extends State<HomeSection> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Welcome,",
-                            style: TextStyle(
-                              fontFamily: "Sans"
-                            ),
+                          Text(
+                            "Welcome,",
+                            style: TextStyle(fontFamily: "Sans"),
                           ),
-                          Text("Sarthak !",
+                          Text(
+                            "Sarthak !",
                             style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: "Sans",
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: "Sans",
                             ),
                           ),
                         ],
                       ),
                       ElevatedButton(
-                        onPressed: (){},
+                        onPressed: () {},
                         style: ElevatedButton.styleFrom(
                           shape: const CircleBorder(),
-                          padding: EdgeInsets.all(16)
+                          padding: EdgeInsets.all(16),
                         ),
                         child: Icon(Icons.search),
                       ),
@@ -57,9 +59,7 @@ class _HomeSectionState extends State<HomeSection> {
                 ),
               ),
             ),
-            SizedBox(
-              height: 10,
-            ),
+            SizedBox(height: 10),
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Container(
@@ -71,15 +71,11 @@ class _HomeSectionState extends State<HomeSection> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Continue Learning Today...",
-                        style: TextStyle(
-                          fontFamily: "Sans",
-                          fontSize: 20,
-                        ),
+                      Text(
+                        "Continue Learning Today...",
+                        style: TextStyle(fontFamily: "Sans", fontSize: 20),
                       ),
-                      SizedBox(
-                        height: 5,
-                      ),
+                      SizedBox(height: 5),
                       Row(
                         children: [
                           ClipRRect(
@@ -91,18 +87,30 @@ class _HomeSectionState extends State<HomeSection> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.pages,color: Colors.white,),
-                                  Text("Learn",style: TextStyle(color: Colors.white),),
+                                  Icon(Icons.pages, color: Colors.white),
+                                  Text(
+                                    "Learn",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                                 ],
                               ),
-                            )
-                          )
+                            ),
+                          ),
+                          OutlinedButton(
+                            onPressed: () async{
+                              await _authService.logout();
+                            },
+                            style: OutlinedButton.styleFrom(
+                              shape: const StadiumBorder(),
+                            ),
+                            child: Text("Logout"),
+                          ),
                         ],
                       ),
                     ],
                   ),
-                )
-              )
+                ),
+              ),
             ),
           ],
         ),
@@ -110,4 +118,3 @@ class _HomeSectionState extends State<HomeSection> {
     );
   }
 }
-

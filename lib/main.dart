@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kte/services/app_state.dart';
 import 'package:kte/views/auth_pages/signup.dart';
 import 'package:kte/views/pages/login.dart';
@@ -12,6 +13,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   runApp(const MyApp());
 }
 
@@ -48,7 +50,7 @@ class _MyAppState extends State<MyApp> {
           if (isFirstTime) {
             return const Login();
           } else if (user == null) {
-            return const RegisterForm();
+            return const Login();
           } else {
             return const WidgetTree();
           }
