@@ -34,11 +34,17 @@ class _HomeSectionState extends State<HomeSection> {
                             children: [
                               Text(
                                 "Welcome Learner!",
-                                style: TextStyle(fontSize: 15, fontFamily: "Sans"),
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontFamily: "Sans",
+                                ),
                               ),
                               Text(
                                 "Sarthak",
-                                style: TextStyle(fontSize: 22, fontFamily: "Sans"),
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontFamily: "Sans",
+                                ),
                               ),
                             ],
                           ),
@@ -93,25 +99,40 @@ class _HomeSectionState extends State<HomeSection> {
                             children: [
                               Text(
                                 "Your Solution, One",
-                                style: TextStyle(fontSize: 20, fontFamily: "Poppins"),
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontFamily: "Poppins",
+                                ),
                               ),
                               Text(
                                 "Tap Away!",
-                                style: TextStyle(fontSize: 20, fontFamily: "Poppins"),
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontFamily: "Poppins",
+                                ),
                               ),
                               Text(
                                 "Seamless, Fast and Reliable",
-                                style: TextStyle(fontSize: 12, fontFamily: "Sans"),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontFamily: "Sans",
+                                ),
                               ),
                               Text(
                                 "Services at your Fingertips",
-                                style: TextStyle(fontSize: 12, fontFamily: "Sans"),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontFamily: "Sans",
+                                ),
                               ),
                               SizedBox(height: 7),
                               OutlinedButton(
                                 style: OutlinedButton.styleFrom(
                                   backgroundColor: Colors.white70,
-                                  side: BorderSide(color: Colors.white70, width: 1),
+                                  side: BorderSide(
+                                    color: Colors.white70,
+                                    width: 1,
+                                  ),
                                   shape: StadiumBorder(),
                                 ),
                                 onPressed: () {},
@@ -137,14 +158,17 @@ class _HomeSectionState extends State<HomeSection> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Continue Learning", style: TextStyle(
-                        fontSize: 18,
-                        fontFamily: "Poppins"
-                    ),),
+                    Text(
+                      "Continue Learning",
+                      style: TextStyle(fontSize: 18, fontFamily: "Poppins"),
+                    ),
                     MaterialButton(
-                      onPressed: (){},
-                      child: Text("View all>",style: TextStyle(color: Colors.blue),),
-                    )
+                      onPressed: () {},
+                      child: Text(
+                        "View all>",
+                        style: TextStyle(color: Colors.blue),
+                      ),
+                    ),
                   ],
                 ),
                 SingleChildScrollView(
@@ -155,13 +179,11 @@ class _HomeSectionState extends State<HomeSection> {
                         width: 190,
                         child: Image.asset("assets/images/HappyFaces.png"),
                       ),
-                      SizedBox(
-                        width: 10,
-                      ),
+                      SizedBox(width: 10),
                       SizedBox(
                         width: 190,
                         child: Image.asset("assets/images/HappyFaces.png"),
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -175,14 +197,17 @@ class _HomeSectionState extends State<HomeSection> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Your Courses", style: TextStyle(
-                        fontSize: 18,
-                        fontFamily: "Poppins"
-                    ),),
+                    Text(
+                      "Your Courses",
+                      style: TextStyle(fontSize: 18, fontFamily: "Poppins"),
+                    ),
                     MaterialButton(
-                      onPressed: (){},
-                      child: Text("View all>",style: TextStyle(color: Colors.blue),),
-                    )
+                      onPressed: () {},
+                      child: Text(
+                        "View all>",
+                        style: TextStyle(color: Colors.blue),
+                      ),
+                    ),
                   ],
                 ),
                 SingleChildScrollView(
@@ -193,13 +218,11 @@ class _HomeSectionState extends State<HomeSection> {
                         width: 190,
                         child: Image.asset("assets/images/HappyFaces.png"),
                       ),
-                      SizedBox(
-                        width: 10,
-                      ),
+                      SizedBox(width: 10),
                       SizedBox(
                         width: 190,
                         child: Image.asset("assets/images/HappyFaces.png"),
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -213,14 +236,17 @@ class _HomeSectionState extends State<HomeSection> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Pending Assignments", style: TextStyle(
-                        fontSize: 18,
-                        fontFamily: "Poppins"
-                    ),),
+                    Text(
+                      "Pending Assignments",
+                      style: TextStyle(fontSize: 18, fontFamily: "Poppins"),
+                    ),
                     MaterialButton(
-                      onPressed: (){},
-                      child: Text("View all>",style: TextStyle(color: Colors.blue),),
-                    )
+                      onPressed: () {},
+                      child: Text(
+                        "View all>",
+                        style: TextStyle(color: Colors.blue),
+                      ),
+                    ),
                   ],
                 ),
                 SingleChildScrollView(
@@ -231,15 +257,98 @@ class _HomeSectionState extends State<HomeSection> {
                         width: 190,
                         child: Image.asset("assets/images/HappyFaces.png"),
                       ),
-                      SizedBox(
-                        width: 10,
-                      ),
+                      SizedBox(width: 10),
                       SizedBox(
                         width: 190,
                         child: Image.asset("assets/images/HappyFaces.png"),
-                      )
+                      ),
                     ],
                   ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "And Much more...",
+                  style: TextStyle(fontSize: 18, fontFamily: "Poppins"),
+                ),
+                Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Container(
+                          width: 150,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.purple.shade200,
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Assignments",
+                              style: TextStyle(fontFamily: "Sans"),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 150,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.purple.shade200,
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Today's Live Classes",
+                              style: TextStyle(fontFamily: "Sans"),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Container(
+                          width: 150,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.purple.shade200,
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Progress",
+                              style: TextStyle(fontFamily: "Sans"),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 150,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.purple.shade200,
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Streak",
+                              style: TextStyle(fontFamily: "Sans"),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
