@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:kte/services/auth_services.dart';
 import 'package:kte/views/pages/login.dart';
+import 'package:kte/views/widget_tree.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegisterForm extends StatefulWidget {
   const RegisterForm({super.key});
@@ -8,15 +12,34 @@ class RegisterForm extends StatefulWidget {
 }
 
 class _RegisterFormState extends State<RegisterForm> {
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   final List<String> userTypes = ["Student", "Parent", "Teacher"];
   String selectedUserType = "Student";
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: true,
+      backgroundColor: Colors.purple.shade50,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        title: Text("Get Started..",style: TextStyle(fontFamily: "Poppins"),),
+        centerTitle: true,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -29,199 +52,192 @@ class _RegisterFormState extends State<RegisterForm> {
         ),
       ),
       extendBodyBehindAppBar: true,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
-            Stack(
-              alignment: Alignment.center,
-              clipBehavior: Clip.none,
-              children: [
-                Hero(
-                  tag: 'Hello',
-                  child: Image.asset('assets/images/HappyFaces.png'),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Hero(
+                tag: 'Hello',
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.asset(
+                      'assets/images/HappyFaces.png',
+                    ),
+                  ),
                 ),
-                Positioned(
-                  bottom: -440, // Increased to accommodate new fields
-                  left: 0,
-                  right: 0,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(60),
-                      child: Container(
-                        width: double.infinity,
-                        height: 520, // Increased height
-                        color: Colors.purple.shade50,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              "Create Account",
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: "Sans",
+              ),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.shade50,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Column(
+                    children: [
+                      const Text(
+                        "Create Account",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: "Sans",
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _firstNameController,
+                              decoration: InputDecoration(
+                                hintText: "First Name",
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 20),
-                            Column(
-                              children: [
-                                SizedBox(
-                                  width: 300,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const SizedBox(
-                                        width: 148,
-                                        child: TextField(
-                                          decoration: InputDecoration(
-                                            filled: true,
-                                            fillColor: Colors.white60,
-                                            hintText: "First Name",
-                                            hintStyle: TextStyle(
-                                              fontFamily: "Sans",
-                                              color: Colors.black54,
-                                            ),
-                                            enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(color: Colors.white60),
-                                              borderRadius: BorderRadius.only(
-                                                bottomLeft: Radius.circular(40),
-                                                topLeft: Radius.circular(40),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        width: 148,
-                                        child: TextField(
-                                          decoration: InputDecoration(
-                                            filled: true,
-                                            fillColor: Colors.white60,
-                                            hintText: "Last Name",
-                                            hintStyle: TextStyle(
-                                              fontFamily: "Sans",
-                                              color: Colors.black54,
-                                            ),
-                                            enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(color: Colors.white60),
-                                              borderRadius: BorderRadius.only(
-                                                topRight: Radius.circular(40),
-                                                bottomRight: Radius.circular(40),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: TextField(
+                              controller: _lastNameController,
+                              decoration: InputDecoration(
+                                hintText: "Last Name",
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
                                 ),
-                                const SizedBox(height: 5),
-                                SizedBox(
-                                  width: 300,
-                                  child: TextField(
-                                    decoration: InputDecoration(
-                                      filled: true,
-                                      fillColor: Colors.white60,
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(40),
-                                        borderSide: const BorderSide(color: Colors.white54),
-                                      ),
-                                      hintText: "Email",
-                                      hintStyle: const TextStyle(
-                                        fontFamily: "Sans",
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                SizedBox(
-                                  width: 300,
-                                  child: TextField(
-                                    obscureText: true,
-                                    decoration: InputDecoration(
-                                      filled: true,
-                                      fillColor: Colors.white60,
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(40),
-                                        borderSide: const BorderSide(color: Colors.white54),
-                                      ),
-                                      hintText: "Password",
-                                      hintStyle: const TextStyle(
-                                        fontFamily: "Sans",
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                // User Type Selection
-                                Container(
-                                  width: 300,
-                                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white60,
-                                    borderRadius: BorderRadius.circular(40),
-                                    border: Border.all(color: Colors.white54),
-                                  ),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String>(
-                                      value: selectedUserType,
-                                      isExpanded: true,
-                                      icon: const Icon(Icons.arrow_drop_down),
-                                      items: userTypes.map((String type) {
-                                        return DropdownMenuItem<String>(
-                                          value: type,
-                                          child: Text(type, style: const TextStyle(fontFamily: "Sans")),
-                                        );
-                                      }).toList(),
-                                      onChanged: (String? newValue) {
-                                        setState(() {
-                                          selectedUserType = newValue!;
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
-                            const SizedBox(height: 20),
-                            OutlinedButton(
-                              onPressed: () {},
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          hintText: "Email",
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          hintText: "Password",
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      DropdownButtonFormField<String>(
+                        initialValue: selectedUserType,
+                        items: userTypes.map((type) {
+                          return DropdownMenuItem(value: type, child: Text(type));
+                        }).toList(),
+                        onChanged: (val) {
+                          setState(() {
+                            selectedUserType = val!;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      _isLoading
+                          ? const CircularProgressIndicator()
+                          : OutlinedButton(
+                              onPressed: () async {
+                                final email = _emailController.text.trim();
+                                final password = _passwordController.text.trim();
+                                final firstName = _firstNameController.text
+                                    .trim();
+                                final lastName = _lastNameController.text.trim();
+                                if (email.isEmpty ||
+                                    password.isEmpty ||
+                                    firstName.isEmpty ||
+                                    lastName.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Please fill all fields"),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                setState(() {
+                                  _isLoading = true;
+                                });
+                                final user = await AuthService().signUp(
+                                  email: email,
+                                  password: password,
+                                  firstName: firstName,
+                                  lastName: lastName,
+                                  userType: selectedUserType,
+                                );
+                                setState(() {
+                                  _isLoading = false;
+                                });
+                                if (user != null) {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const WidgetTree(),
+                                    ),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Registration Failed, Please Try Again"),
+                                    ),
+                                  );
+                                }
+                              },
                               style: OutlinedButton.styleFrom(
-                                minimumSize: const Size(300, 50),
-                                side: const BorderSide(color: Colors.black54, width: 1),
-                                shape: const StadiumBorder(),
+                                minimumSize: const Size(double.infinity, 50),
                                 backgroundColor: Colors.purple.shade900,
                               ),
                               child: const Text(
                                 "Register",
-                                style: TextStyle(
-                                  fontFamily: "Sans",
-                                  color: Colors.white70,
-                                ),
+                                style: TextStyle(color: Colors.white),
                               ),
                             ),
-                            const SizedBox(height: 10),
-                            const Text(
-                              "Already have an account? Login",
-                              style: TextStyle(
-                                fontFamily: "Sans",
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ],
+                      const SizedBox(
+                        width: 300,
+                        child: Text(
+                          "Registering in for our Services means you agree to our Terms of Service and Privacy Policy",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: "Sans",
+                            color: Colors.black54,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 450),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );

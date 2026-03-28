@@ -8,35 +8,131 @@ class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
+      backgroundColor: Colors.purple.shade50,
+      body: SafeArea(
+        child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                "Welcome to KTE",
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              const SizedBox(height: 30),
+
+              /// 🔥 TOP IMAGE (same hero for smooth animation)
+              Hero(
+                tag: 'Hello',
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.asset(
+                      'assets/images/HappyFaces.png',
+                      height: 220,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginForm()),
-                  );
-                },
-                child: const Text("Login"),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const RegisterForm()),
-                  );
-                },
-                child: const Text("Register"),
+
+              const SizedBox(height: 10),
+
+              /// 🔥 MAIN CARD
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20, vertical: 25),
+                decoration: BoxDecoration(
+                  color: Colors.purple.shade50,
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                child: Column(
+                  children: [
+                    /// TITLE
+                    const Text(
+                      "Welcome to KTE",
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: "Poppins",
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    const Text(
+                      "Start your journey with us",
+                      style: TextStyle(
+                        fontFamily: "Sans",
+                        color: Colors.black54,
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    /// LOGIN BUTTON
+                    OutlinedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const LoginForm()),
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 55),
+                        backgroundColor: Colors.purple.shade900,
+                        shape: const StadiumBorder(),
+                      ),
+                      child: const Text(
+                        "Login",
+                        style: TextStyle(
+                          fontFamily: "Sans",
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    /// REGISTER BUTTON
+                    OutlinedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const RegisterForm()),
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 55),
+                        side: const BorderSide(
+                            color: Colors.black54, width: 1),
+                        shape: const StadiumBorder(),
+                        backgroundColor: Colors.white,
+                      ),
+                      child: const Text(
+                        "Create Account",
+                        style: TextStyle(
+                          fontFamily: "Sans",
+                          color: Colors.black87,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    /// FOOTER TEXT
+                    const Text(
+                      "By continuing, you agree to our Terms & Privacy Policy",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: "Sans",
+                        fontSize: 12,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

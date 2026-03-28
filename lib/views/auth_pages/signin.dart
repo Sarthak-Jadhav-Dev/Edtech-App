@@ -110,8 +110,6 @@ class _LoginFormState extends State<LoginForm> {
                         style: TextStyle(fontFamily: "Sans")),
 
                     const SizedBox(height: 10),
-
-                    /// ✅ FORM START
                     Form(
                       key: _formKey,
                       child: Column(
@@ -179,8 +177,6 @@ class _LoginFormState extends State<LoginForm> {
                     ),
 
                     const SizedBox(height: 15),
-
-                    /// LOGIN BUTTON
                     OutlinedButton(
                       onPressed: () async{
                         if (!_formKey.currentState!.validate()) return;
@@ -201,7 +197,7 @@ class _LoginFormState extends State<LoginForm> {
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Login Failed")),
+                            const SnackBar(content: Text("Please check your credentials")),
                           );
                         }
                       },

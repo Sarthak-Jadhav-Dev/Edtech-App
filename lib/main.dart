@@ -37,20 +37,20 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
       home: FutureBuilder(
-        future: AppState.isFirstTime(),
+        future: AppState.isFirstTime(), // this return appstate data
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),
             );
           }
-          bool isFirstTime = snapshot.data as bool;
-          final user = FirebaseAuth.instance.currentUser;
+          bool isFirstTime = snapshot.data as bool; //true or false
+          final user = FirebaseAuth.instance.currentUser; // we will check for active seesion
 
           if (isFirstTime) {
-            return const Login();
+            return  Login();
           } else if (user == null) {
-            return const Login();
+            return  Login();
           } else {
             return const WidgetTree();
           }

@@ -39,12 +39,24 @@ class _HomeSectionState extends State<HomeSection> {
                                   fontFamily: "Sans",
                                 ),
                               ),
-                              Text(
-                                "Sarthak",
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontFamily: "Sans",
-                                ),
+                              FutureBuilder(
+                                future: AuthService().getUserData(),
+                                builder: (context, asyncSnapshot) {
+                                  if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+                                    return const Center(child: CircularProgressIndicator());
+                                  }
+                                  if (!asyncSnapshot.hasData || asyncSnapshot.data!.data() == null) {
+                                    return Center(child: Text("No user data found"));
+                                  }
+                                  var data = asyncSnapshot.data!.data() as Map<String, dynamic>;
+                                  return Text(
+                                    "${data['firstName']}",
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontFamily: "Sans",
+                                    ),
+                                  );
+                                }
                               ),
                             ],
                           ),

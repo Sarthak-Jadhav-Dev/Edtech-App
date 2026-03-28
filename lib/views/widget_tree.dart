@@ -22,7 +22,7 @@ class _WidgetTreeState extends State<WidgetTree> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Kids Trans EduTech",
+          "Kids EduTech",
           style: TextStyle(
             fontFamily: "Sans",
             fontWeight: FontWeight.bold,
