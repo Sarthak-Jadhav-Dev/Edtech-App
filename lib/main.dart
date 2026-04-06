@@ -37,7 +37,7 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
       home: FutureBuilder(
-        future: AppState.isFirstTime(), // this return appstate data
+        future: AppState.isFirstTime(), 
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Scaffold(

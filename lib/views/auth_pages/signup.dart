@@ -4,6 +4,7 @@ import 'package:kte/services/auth_services.dart';
 import 'package:kte/views/pages/login.dart';
 import 'package:kte/views/widget_tree.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kte/services/firestore_service.dart' as kte_firestore;
 
 class RegisterForm extends StatefulWidget {
   const RegisterForm({super.key});
@@ -16,6 +17,7 @@ class _RegisterFormState extends State<RegisterForm> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _parentEmailController = TextEditingController();
 
   final List<String> userTypes = ["Student", "Parent", "Teacher"];
   String selectedUserType = "Student";
@@ -27,6 +29,7 @@ class _RegisterFormState extends State<RegisterForm> {
     _lastNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _parentEmailController.dispose();
     super.dispose();
   }
 
@@ -163,6 +166,20 @@ class _RegisterFormState extends State<RegisterForm> {
                           ),
                         ),
                       ),
+                      if (selectedUserType == "Student") ...[
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: _parentEmailController,
+                          decoration: InputDecoration(
+                            hintText: "Parent's Email (Optional)",
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 20),
                       _isLoading
                           ? const CircularProgressIndicator()
@@ -170,9 +187,10 @@ class _RegisterFormState extends State<RegisterForm> {
                               onPressed: () async {
                                 final email = _emailController.text.trim();
                                 final password = _passwordController.text.trim();
-                                final firstName = _firstNameController.text
-                                    .trim();
+                                final firstName = _firstNameController.text.trim();
                                 final lastName = _lastNameController.text.trim();
+                                final parentEmail = _parentEmailController.text.trim();
+
                                 if (email.isEmpty ||
                                     password.isEmpty ||
                                     firstName.isEmpty ||
@@ -194,18 +212,29 @@ class _RegisterFormState extends State<RegisterForm> {
                                   lastName: lastName,
                                   userType: selectedUserType,
                                 );
+                                
+                                if (user != null && selectedUserType == 'Student' && parentEmail.isNotEmpty) {
+                                  final parentDoc = await kte_firestore.FirestoreService().searchUserByEmail(parentEmail);
+                                  if (parentDoc != null && (parentDoc.data() as Map<String, dynamic>)['userType'] == 'Parent') {
+                                    await kte_firestore.FirestoreService().linkParentToStudent(user.uid, parentDoc.id);
+                                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Linked to Parent successfully!")));
+                                  } else {
+                                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Parent not found. You can link later.")));
+                                  }
+                                }
+
                                 setState(() {
                                   _isLoading = false;
                                 });
                                 if (user != null) {
-                                  Navigator.pushReplacement(
+                                  if (mounted) Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
                                       builder: (_) => const WidgetTree(),
                                     ),
                                   );
                                 } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text("Registration Failed, Please Try Again"),
                                     ),
