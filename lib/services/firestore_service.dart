@@ -1,10 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:kte/services/gamification_event_bus.dart';
+import 'package:kte/services/ai_quiz_evaluator.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  // final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  // --- Classes Collection ---
+  // --- Content Subcollection ---
 
   Future<String?> createClass({
     required String name,
@@ -32,7 +36,6 @@ class FirestoreService {
   Stream<QuerySnapshot> getTeacherClasses(String teacherId) {
     return _db.collection('classes')
         .where('teacherId', isEqualTo: teacherId)
-        .orderBy('createdAt', descending: true)
         .snapshots();
   }
 
@@ -60,19 +63,33 @@ class FirestoreService {
     return await _db.collection('classes').doc(classId).get();
   }
 
+  Future<bool> deleteClass(String classId) async {
+    try {
+      await _db.collection('classes').doc(classId).delete();
+      return true;
+    } catch (e) {
+      debugPrint("Error deleting class: $e");
+      return false;
+    }
+  }
+
   // --- Content Subcollection ---
 
   Future<bool> addContent({
     required String classId,
     required String title,
-    required String type, // 'video' or 'assignment'
-    required String url,
+    required String type, // 'video', 'assignment'
+    required String url, // Store full URL or Video ID
+    String? description,
+    String? videoId,
   }) async {
     try {
       await _db.collection('classes').doc(classId).collection('content').add({
         'title': title,
         'type': type,
         'url': url,
+        if (videoId != null) 'videoId': videoId,
+        if (description != null) 'description': description,
         'createdAt': FieldValue.serverTimestamp(),
       });
       return true;
@@ -86,6 +103,16 @@ class FirestoreService {
     return _db.collection('classes').doc(classId).collection('content')
         .orderBy('createdAt', descending: true)
         .snapshots();
+  }
+
+  Future<bool> deleteContent(String classId, String contentId) async {
+    try {
+      await _db.collection('classes').doc(classId).collection('content').doc(contentId).delete();
+      return true;
+    } catch (e) {
+      debugPrint("Error deleting content: $e");
+      return false;
+    }
   }
 
   // --- Users Collection ---
@@ -108,11 +135,20 @@ class FirestoreService {
 
   Future<bool> linkParentToStudent(String studentId, String parentId) async {
     try {
+      // Enforce max 2 parents
+      final studentDoc = await _db.collection('users').doc(studentId).get();
+      if (studentDoc.exists) {
+        final data = studentDoc.data() as Map<String, dynamic>;
+        final existing = List<String>.from(data['linkedParentIds'] ?? []);
+        if (existing.contains(parentId)) return false; // already linked
+        if (existing.length >= 2) return false;         // max reached
+      }
+
       WriteBatch batch = _db.batch();
 
       DocumentReference studentRef = _db.collection('users').doc(studentId);
       batch.update(studentRef, {
-        'linkedParentId': parentId
+        'linkedParentIds': FieldValue.arrayUnion([parentId])
       });
 
       DocumentReference parentRef = _db.collection('users').doc(parentId);
@@ -128,13 +164,29 @@ class FirestoreService {
     }
   }
 
+  /// Fetches full parent documents for a student's linked parent IDs.
+  Future<List<Map<String, dynamic>>> getLinkedParents(List<dynamic> parentIds) async {
+    if (parentIds.isEmpty) return [];
+    try {
+      final qs = await _db.collection('users')
+          .where(FieldPath.documentId, whereIn: parentIds.take(2).toList())
+          .get();
+      return qs.docs.map((doc) {
+        final data = doc.data();
+        data['uid'] = doc.id;
+        return data;
+      }).toList();
+    } catch (e) {
+      debugPrint("Error fetching linked parents: $e");
+      return [];
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getLinkedChildren(List<dynamic> childIds) async {
     List<Map<String, dynamic>> children = [];
     if (childIds.isEmpty) return children;
 
     try {
-      // Split into batches of 10 if necessary (Firestore limitation for 'whereIn')
-      // Assuming for now it's small.
       final qs = await _db.collection('users')
           .where(FieldPath.documentId, whereIn: childIds.take(10).toList())
           .get();
@@ -148,5 +200,382 @@ class FirestoreService {
       debugPrint("Error fetching children: $e");
     }
     return children;
+  }
+
+  Future<List<Map<String, dynamic>>> getPendingAssignments(List<String> classIds) async {
+    List<Map<String, dynamic>> allAssignments = [];
+    if (classIds.isEmpty) return allAssignments;
+
+    try {
+      for (String classId in classIds) {
+        final qs = await _db.collection('classes').doc(classId).collection('content')
+            .where('type', isEqualTo: 'assignment')
+            .orderBy('createdAt', descending: true)
+            .limit(5)
+            .get();
+            
+        for (var doc in qs.docs) {
+          var data = doc.data();
+          data['id'] = doc.id;
+          data['classId'] = classId;
+          allAssignments.add(data);
+        }
+      }
+      
+      allAssignments.sort((a, b) {
+        final aTime = a['createdAt'] as Timestamp?;
+        final bTime = b['createdAt'] as Timestamp?;
+        if (aTime == null || bTime == null) return 0;
+        return bTime.compareTo(aTime);
+      });
+    } catch (e) {
+      debugPrint("Error fetching assignments: $e");
+    }
+    return allAssignments;
+  }
+
+  // --- Student Progress Tracking ---
+
+  // --- YouTube Video Progress Tracking ---
+
+  Future<void> updateVideoProgress({
+    required String studentId,
+    required String videoId,
+    required double watchedPercentage,
+  }) async {
+    try {
+      final completed = watchedPercentage >= 90;
+      await _db.collection('users').doc(studentId).collection('progress').doc(videoId).set({
+        'watchedPercentage': watchedPercentage,
+        'lastWatchedAt': FieldValue.serverTimestamp(),
+        'completed': completed,
+      }, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint("Error updating video progress: $e");
+    }
+  }
+
+  Stream<DocumentSnapshot> getVideoProgress(String studentId, String videoId) {
+    return _db.collection('users').doc(studentId).collection('progress').doc(videoId).snapshots();
+  }
+
+  Future<List<Map<String, dynamic>>> getClassLeaderboard(String classId) async {
+    try {
+      final classDoc = await getClassDetails(classId);
+      if (!classDoc.exists) return [];
+      
+      final enrolledStudentIds = List<String>.from((classDoc.data() as Map<String, dynamic>)['enrolledStudents'] ?? []);
+      if (enrolledStudentIds.isEmpty) return [];
+
+      final userQs = await _db.collection('users')
+          .where(FieldPath.documentId, whereIn: enrolledStudentIds.take(10).toList())
+          .get();
+          
+      final List<Map<String, dynamic>> students = [];
+      for (var doc in userQs.docs) {
+        final data = doc.data();
+        data['uid'] = doc.id;
+        students.add(data);
+      }
+      
+      students.sort((a, b) => ((b['xp'] ?? 0) as int).compareTo((a['xp'] ?? 0) as int));
+      return students;
+    } catch (e) {
+      debugPrint("Error fetching leaderboard: $e");
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getClassStudentProgress(String classId) async {
+    try {
+      final List<Map<String, dynamic>> studentsData = [];
+      
+      // Get all enrolled students
+      final classDoc = await getClassDetails(classId);
+      if (!classDoc.exists) return [];
+      
+      final enrolledStudentIds = List<String>.from((classDoc.data() as Map<String, dynamic>)['enrolledStudents'] ?? []);
+      if (enrolledStudentIds.isEmpty) return [];
+
+      // Fetch progress
+      final progressQs = await _db.collection('classes').doc(classId).collection('student_progress').get();
+      final progressMap = {for (var doc in progressQs.docs) doc.id: doc.data()};
+
+      // Fetch student users
+      final userQs = await _db.collection('users').where(FieldPath.documentId, whereIn: enrolledStudentIds.take(10).toList()).get();
+      
+      for (var doc in userQs.docs) {
+        final userData = doc.data();
+        final pgData = progressMap[doc.id] ?? {};
+        studentsData.add({
+          'uid': doc.id,
+          'firstName': userData['firstName'],
+          'lastName': userData['lastName'],
+          'email': userData['email'],
+          'linkedParentIds': userData['linkedParentIds'] ?? [],
+          'progress': pgData,
+        });
+      }
+      return studentsData;
+    } catch (e) {
+      debugPrint("Error fetching class progress: $e");
+      return [];
+    }
+  }
+
+  // --- Quiz System ---
+
+  Future<String?> createQuiz({
+    required String classId,
+    required String title,
+    required String description,
+    required int timeLimitMinutes,
+    required List<Map<String, dynamic>> questions,
+  }) async {
+    try {
+      final docRef = await _db.collection('classes').doc(classId).collection('quizzes').add({
+        'title': title,
+        'description': description,
+        'timeLimitMinutes': timeLimitMinutes,
+        'questions': questions,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      return docRef.id;
+    } catch (e) {
+      debugPrint("Error creating quiz: $e");
+      return null;
+    }
+  }
+
+  Stream<QuerySnapshot> getClassQuizzes(String classId) {
+    return _db.collection('classes').doc(classId).collection('quizzes')
+        .orderBy('createdAt', descending: true)
+        .snapshots();
+  }
+
+  Future<bool> deleteQuiz(String classId, String quizId) async {
+    try {
+      await _db.collection('classes').doc(classId).collection('quizzes').doc(quizId).delete();
+      return true;
+    } catch (e) {
+      debugPrint("Error deleting quiz: $e");
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>?> submitQuizResult({
+    required String classId,
+    required String quizId,
+    required String studentId,
+    required List<int> answers,
+    required List<Map<String, dynamic>> questions,
+    required int timeTakenSeconds,
+  }) async {
+    try {
+      int score = 0;
+      for (int i = 0; i < questions.length; i++) {
+        if (i < answers.length && answers[i] == questions[i]['correctIndex']) {
+          score++;
+        }
+      }
+      final percentage = questions.isEmpty ? 0.0 : (score / questions.length) * 100;
+      final isPerfect = score == questions.length && questions.isNotEmpty;
+
+      final resultData = {
+        'quizId': quizId,
+        'studentId': studentId,
+        'score': score,
+        'totalQuestions': questions.length,
+        'percentage': percentage,
+        'timeTakenSeconds': timeTakenSeconds,
+        'answers': answers,
+        'submittedAt': FieldValue.serverTimestamp(),
+      };
+
+      final docRef = await _db.collection('classes').doc(classId).collection('quiz_results').add(resultData);
+
+      // Trigger AI asynchronously - don't await so the student gets their result instantly
+      AiQuizEvaluator.generateInsights(
+        questions: questions,
+        studentAnswers: answers,
+        score: score,
+        timeSeconds: timeTakenSeconds,
+      ).then((insights) {
+        if (insights != null) {
+          docRef.update({'aiInsights': insights});
+        }
+      });
+
+      // Award XP
+      int xpEarned = 20; // base XP for taking a quiz
+      if (isPerfect) xpEarned += 50; // bonus for perfect score
+      
+      await awardXP(studentId, xpEarned, isPerfect: isPerfect);
+
+      return {
+        'score': score,
+        'totalQuestions': questions.length,
+        'percentage': percentage,
+        'xpEarned': xpEarned,
+        'isPerfect': isPerfect,
+      };
+    } catch (e) {
+      debugPrint("Error submitting quiz: $e");
+      return null;
+    }
+  }
+
+  Future<QuerySnapshot?> getStudentQuizResult(String classId, String quizId, String studentId) async {
+    try {
+      return await _db.collection('classes').doc(classId).collection('quiz_results')
+          .where('quizId', isEqualTo: quizId)
+          .where('studentId', isEqualTo: studentId)
+          .limit(1)
+          .get();
+    } catch (e) {
+      debugPrint("Error checking quiz result: $e");
+      return null;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getQuizResultsForQuiz(String classId, String quizId) async {
+    try {
+      final qs = await _db.collection('classes').doc(classId).collection('quiz_results')
+          .where('quizId', isEqualTo: quizId)
+          .get();
+
+      List<Map<String, dynamic>> results = [];
+      for (var doc in qs.docs) {
+        var data = doc.data();
+        // Fetch student name
+        try {
+          final userDoc = await _db.collection('users').doc(data['studentId']).get();
+          if (userDoc.exists) {
+            final userData = userDoc.data() as Map<String, dynamic>;
+            data['studentName'] = "${userData['firstName']} ${userData['lastName']}";
+          }
+        } catch (_) {}
+        results.add(data);
+      }
+      return results;
+    } catch (e) {
+      debugPrint("Error fetching quiz results: $e");
+      return [];
+    }
+  }
+
+  // --- Gamification / XP System ---
+
+  Future<void> awardXP(String userId, int xp, {bool isPerfect = false}) async {
+    try {
+      final userRef = _db.collection('users').doc(userId);
+      final userDoc = await userRef.get();
+      if (!userDoc.exists) return;
+
+      final userData = userDoc.data() as Map<String, dynamic>;
+      final currentXP = (userData['xp'] as int?) ?? 0;
+      final currentQuizzes = (userData['quizzesTaken'] as int?) ?? 0;
+      final currentPerfect = (userData['perfectScores'] as int?) ?? 0;
+      final currentBadges = List<Map<String, dynamic>>.from(userData['badges'] ?? []);
+
+      final currentLevel = (currentXP / 100).floor() + 1;
+      final newXP = currentXP + xp;
+      final newLevel = (newXP / 100).floor() + 1; // 100 XP per level
+      final newQuizzes = currentQuizzes + 1;
+      final newPerfect = isPerfect ? currentPerfect + 1 : currentPerfect;
+
+      // Broadcast simple XP gain
+      if (xp > 0) GamificationEventBus.emitReward(RewardEvent(type: RewardType.xpGained, amount: xp));
+
+      if (newLevel > currentLevel) {
+        GamificationEventBus.emitReward(RewardEvent(type: RewardType.levelUp, amount: newLevel));
+      }
+
+      // Check for new badges
+      List<Map<String, dynamic>> newBadges = List.from(currentBadges);
+      final badgeNames = newBadges.map((b) => b['name']).toSet();
+
+      if (newQuizzes >= 1 && !badgeNames.contains('Quiz Rookie')) {
+        newBadges.add({'name': 'Quiz Rookie', 'icon': 'quiz', 'earnedAt': Timestamp.now()});
+        GamificationEventBus.emitReward(RewardEvent(type: RewardType.badgeEarned, title: 'Quiz Rookie'));
+      }
+      if (newQuizzes >= 5 && !badgeNames.contains('Quiz Pro')) {
+        newBadges.add({'name': 'Quiz Pro', 'icon': 'star', 'earnedAt': Timestamp.now()});
+        GamificationEventBus.emitReward(RewardEvent(type: RewardType.badgeEarned, title: 'Quiz Pro'));
+      }
+      if (newPerfect >= 3 && !badgeNames.contains('Perfectionist')) {
+        newBadges.add({'name': 'Perfectionist', 'icon': 'trophy', 'earnedAt': Timestamp.now()});
+        GamificationEventBus.emitReward(RewardEvent(type: RewardType.badgeEarned, title: 'Perfectionist'));
+      }
+      if (newXP >= 500 && !badgeNames.contains('XP Hunter')) {
+        newBadges.add({'name': 'XP Hunter', 'icon': 'bolt', 'earnedAt': Timestamp.now()});
+        GamificationEventBus.emitReward(RewardEvent(type: RewardType.badgeEarned, title: 'XP Hunter'));
+      }
+      if (newLevel >= 10 && !badgeNames.contains('Veteran Learner')) {
+        newBadges.add({'name': 'Veteran Learner', 'icon': 'school', 'earnedAt': Timestamp.now()});
+        GamificationEventBus.emitReward(RewardEvent(type: RewardType.badgeEarned, title: 'Veteran Learner'));
+      }
+
+      await userRef.update({
+        'xp': newXP,
+        'level': newLevel,
+        'quizzesTaken': newQuizzes,
+        'perfectScores': newPerfect,
+        'badges': newBadges,
+      });
+    } catch (e) {
+      debugPrint("Error awarding XP: $e");
+    }
+  }
+
+  Future<void> updateLoginStreak(String userId) async {
+    try {
+      final userRef = _db.collection('users').doc(userId);
+      final userDoc = await userRef.get();
+      if (!userDoc.exists) return;
+
+      final userData = userDoc.data() as Map<String, dynamic>;
+      final lastLogin = userData['lastLoginDate'] as Timestamp?;
+      final currentStreak = (userData['currentStreak'] as int?) ?? 0;
+
+      final now = DateTime.now();
+      int newStreak = currentStreak;
+      bool streakContinued = false;
+
+      if (lastLogin != null) {
+        final lastLoginDate = lastLogin.toDate();
+        final difference = DateTime(now.year, now.month, now.day)
+            .difference(DateTime(lastLoginDate.year, lastLoginDate.month, lastLoginDate.day))
+            .inDays;
+
+        if (difference == 1) {
+          newStreak++;
+          streakContinued = true;
+        } else if (difference > 1) {
+          newStreak = 1; // Reset
+        }
+      } else {
+        newStreak = 1; 
+      }
+
+      await userRef.update({
+        'currentStreak': newStreak,
+        'lastLoginDate': FieldValue.serverTimestamp(),
+      });
+
+      if (streakContinued) {
+        // Delay slighty so UI receives it after app start
+        Future.delayed(const Duration(seconds: 2), () {
+          awardXP(userId, 10);
+          GamificationEventBus.emitReward(RewardEvent(type: RewardType.streakContinued, amount: 10));
+        });
+      }
+    } catch (e) {
+      debugPrint("Error updating streak: $e");
+    }
+  }
+
+  Stream<DocumentSnapshot> getUserStream(String userId) {
+    return _db.collection('users').doc(userId).snapshots();
   }
 }

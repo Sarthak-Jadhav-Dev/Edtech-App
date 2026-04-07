@@ -7,6 +7,10 @@ import 'package:kte/views/student/link_parent_screen.dart';
 import 'package:kte/views/teacher/teacher_dashboard.dart';
 import 'package:kte/views/parent/parent_dashboard.dart';
 import 'package:kte/views/pages/login.dart';
+import 'package:kte/views/student/chatbot/chatbot_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:kte/services/firestore_service.dart';
+import 'package:kte/views/common/gamification/global_reward_overlay.dart';
 
 class WidgetTree extends StatefulWidget {
   const WidgetTree({super.key});
@@ -40,6 +44,12 @@ class _WidgetTreeState extends State<WidgetTree> {
           userType = doc['userType'];
           isLoading = false;
         });
+        
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null && userType == 'Student') {
+          // Update daily login streak asynchronously for students
+          FirestoreService().updateLoginStreak(user.uid);
+        }
       } else {
         setState(() {
           isLoading = false;
@@ -61,6 +71,7 @@ class _WidgetTreeState extends State<WidgetTree> {
     }
 
     Widget bodyWidget;
+    Widget? floatingActionButton;
     List<Widget> drawerItems = [];
 
     // Base header for Drawer
@@ -73,14 +84,17 @@ class _WidgetTreeState extends State<WidgetTree> {
             color: Colors.purple.shade100,
             borderRadius: BorderRadius.circular(10),
           ),
-          child: const Padding(
-            padding: EdgeInsets.all(8.0),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("What to Learn",style: TextStyle(fontSize:20,fontFamily: "Sans"),),
-                Text("Today ?",style: TextStyle(fontSize:25,fontFamily: "Sans"),),
-                SizedBox(height: 20),
+                Text(
+                  userType == 'Teacher' ? "What to Teach" : "What to Learn",
+                  style: const TextStyle(fontSize: 20, fontFamily: "Sans"),
+                ),
+                const Text("Today ?", style: TextStyle(fontSize: 25, fontFamily: "Sans")),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -109,14 +123,6 @@ class _WidgetTreeState extends State<WidgetTree> {
           splashColor: Colors.purple.shade100,
           onTap: () {
             Navigator.pop(context);
-          },
-        ),
-        ListTile(
-          title: Text("Create Class", style: textStyle),
-          leading: const Icon(Icons.add),
-          splashColor: Colors.purple.shade100,
-          onTap: () {
-            // Need to implement navigation to Create Course
           },
         ),
       ]);
@@ -161,6 +167,15 @@ class _WidgetTreeState extends State<WidgetTree> {
           },
         ),
       ]);
+      
+      floatingActionButton = FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatbotScreen()));
+        },
+        backgroundColor: Colors.orangeAccent,
+        icon: const Icon(Icons.smart_toy, color: Colors.white),
+        label: const Text("AI Buddy", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      );
     }
 
     drawerItems.addAll([
@@ -187,25 +202,28 @@ class _WidgetTreeState extends State<WidgetTree> {
       ),
     ]);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Kids EduTech",
-          style: TextStyle(
-            fontFamily: "Sans",
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-            color: Colors.black,
+    return GlobalRewardOverlay(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            "Kids EduTech",
+            style: TextStyle(
+              fontFamily: "Sans",
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              color: Colors.black,
+            ),
+          ),
+          centerTitle: true,
+        ),
+        drawer: Drawer(
+          child: ListView(
+            children: drawerItems,
           ),
         ),
-        centerTitle: true,
+        body: bodyWidget,
+        floatingActionButton: floatingActionButton,
       ),
-      drawer: Drawer(
-        child: ListView(
-          children: drawerItems,
-        ),
-      ),
-      body: bodyWidget,
     );
   }
 }

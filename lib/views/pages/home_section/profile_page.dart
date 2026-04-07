@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kte/services/auth_services.dart';
+import 'package:kte/services/theme_notifier.dart';
 import '../login.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -109,7 +110,29 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 const SizedBox(height: 20),
 
-                buildTile(Icons.palette, "Appearance"),
+                ValueListenableBuilder<ThemeMode>(
+                  valueListenable: themeNotifier,
+                  builder: (context, themeMode, _) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: SwitchListTile(
+                          secondary: const Icon(Icons.palette, color: Colors.black87),
+                          title: const Text("Dark Mode", style: TextStyle(fontFamily: "Poppins", color: Colors.black87)),
+                          value: themeMode == ThemeMode.dark,
+                          activeColor: Colors.purple,
+                          onChanged: (bool value) {
+                            toggleTheme(value);
+                          },
+                        ),
+                      ),
+                    );
+                  }
+                ),
 
                 const SizedBox(height: 10),
 

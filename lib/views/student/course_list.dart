@@ -53,7 +53,7 @@ class _CourseListScreenState extends State<CourseListScreen> {
                     child: Icon(Icons.book, color: Colors.white),
                   ),
                   title: Text(classData['name'] ?? 'Unnamed', style: const TextStyle(fontFamily: "Poppins", fontSize: 18, fontWeight: FontWeight.bold)),
-                  subtitle: Text("Subject: \${classData['subject']}", style: const TextStyle(fontFamily: "Sans")),
+                  subtitle: Text("Subject: ${classData['subject']}", style: const TextStyle(fontFamily: "Sans")),
                   trailing: const Icon(Icons.arrow_forward_ios, color: Colors.purple),
                   onTap: () {
                     Navigator.push(context, MaterialPageRoute(

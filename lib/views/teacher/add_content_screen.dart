@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kte/services/firestore_service.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class AddContentScreen extends StatefulWidget {
   final String classId;
@@ -12,6 +13,7 @@ class AddContentScreen extends StatefulWidget {
 
 class _AddContentScreenState extends State<AddContentScreen> {
   final _titleController = TextEditingController();
+  final _descController = TextEditingController();
   final _urlController = TextEditingController();
   String _selectedType = 'video';
   bool _isLoading = false;
@@ -19,92 +21,161 @@ class _AddContentScreenState extends State<AddContentScreen> {
   @override
   void dispose() {
     _titleController.dispose();
+    _descController.dispose();
     _urlController.dispose();
     super.dispose();
   }
 
   Future<void> _addContent() async {
-    if (_titleController.text.trim().isEmpty || _urlController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all fields')));
+    final title = _titleController.text.trim();
+    final url = _urlController.text.trim();
+
+    if (title.isEmpty) {
+      _showSnack('Title is required');
       return;
+    }
+
+    if (url.isEmpty) {
+      _showSnack('URL is required');
+      return;
+    }
+
+    String? videoId;
+    if (_selectedType == 'video') {
+      videoId = YoutubePlayer.convertUrlToId(url);
+      if (videoId == null) {
+        _showSnack('Invalid YouTube URL. Please paste a valid link.');
+        return;
+      }
     }
 
     setState(() => _isLoading = true);
 
     bool success = await FirestoreService().addContent(
       classId: widget.classId,
-      title: _titleController.text.trim(),
+      title: title,
+      description: _descController.text.trim().isNotEmpty ? _descController.text.trim() : null,
       type: _selectedType,
-      url: _urlController.text.trim(),
+      url: url,
+      videoId: videoId,
     );
 
     setState(() => _isLoading = false);
 
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Content added!')));
+      _showSnack('Content added successfully!');
       Navigator.pop(context);
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to add content.')));
+      _showSnack('Failed to add content.');
     }
+  }
+
+  void _showSnack(String msg) {
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.purple.shade50,
-      appBar: AppBar(title: const Text("Add Content", style: TextStyle(fontFamily: "Poppins")), backgroundColor: Colors.transparent),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _titleController,
-              decoration: InputDecoration(
-                labelText: "Title",
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _urlController,
-              decoration: InputDecoration(
-                labelText: "URL (YouTube / Google Forms)",
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
-              ),
-            ),
-            const SizedBox(height: 20),
-            DropdownButtonFormField<String>(
-              value: _selectedType,
-              items: const [
-                DropdownMenuItem(value: 'video', child: Text("YouTube Video")),
-                DropdownMenuItem(value: 'assignment', child: Text("Google Forms Assignment")),
-              ],
-              onChanged: (val) {
-                if (val != null) setState(() => _selectedType = val);
-              },
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
-              ),
-            ),
-            const SizedBox(height: 40),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : OutlinedButton(
-                    onPressed: _addContent,
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50),
-                      backgroundColor: Colors.purple.shade900,
-                      shape: const StadiumBorder(),
-                    ),
-                    child: const Text("Save Content", style: TextStyle(color: Colors.white, fontFamily: "Sans", fontSize: 16)),
-                  ),
-          ],
+      appBar: AppBar(
+        title: const Text("Add Learning Material", style: TextStyle(fontFamily: "Poppins", color: Colors.black)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+           child: Column(
+             children: [
+               Container(
+                 decoration: BoxDecoration(
+                   color: Theme.of(context).cardColor,
+                   borderRadius: BorderRadius.circular(25),
+                   boxShadow: [
+                     BoxShadow(
+                       color: Colors.grey.withOpacity(0.2),
+                       blurRadius: 10,
+                       offset: const Offset(0, 5),
+                     )
+                   ],
+                 ),
+                 padding: const EdgeInsets.all(25.0),
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.stretch,
+                   children: [
+                     DropdownButtonFormField<String>(
+                       value: _selectedType,
+                       items: const [
+                         DropdownMenuItem(value: 'video', child: Text("YouTube Video")),
+                         DropdownMenuItem(value: 'assignment', child: Text("Google Forms Assignment")),
+                       ],
+                       onChanged: (val) {
+                         if (val != null) setState(() => _selectedType = val);
+                       },
+                       decoration: InputDecoration(
+                         labelText: "Content Type",
+                         prefixIcon: Icon(Icons.category, color: Colors.purple.shade400),
+                         filled: true,
+                         fillColor: Colors.purple.shade50.withOpacity(0.5),
+                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                       ),
+                     ),
+                     const SizedBox(height: 20),
+                     TextField(
+                       controller: _titleController,
+                       decoration: InputDecoration(
+                         labelText: "Title",
+                         prefixIcon: Icon(Icons.title, color: Colors.purple.shade400),
+                         filled: true,
+                         fillColor: Colors.purple.shade50.withOpacity(0.5),
+                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                       ),
+                     ),
+                     const SizedBox(height: 20),
+                     TextField(
+                       controller: _descController,
+                       maxLines: 2,
+                       decoration: InputDecoration(
+                         labelText: "Description",
+                         prefixIcon: Icon(Icons.description, color: Colors.purple.shade400),
+                         filled: true,
+                         fillColor: Colors.purple.shade50.withOpacity(0.5),
+                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                       ),
+                     ),
+                     const SizedBox(height: 20),
+                     
+                     TextField(
+                       controller: _urlController,
+                       decoration: InputDecoration(
+                         labelText: _selectedType == 'video' ? "YouTube Video Link (Unlisted/Public)" : "Assignment URL Link",
+                         prefixIcon: Icon(Icons.link, color: Colors.purple.shade400),
+                         filled: true,
+                         fillColor: Colors.purple.shade50.withOpacity(0.5),
+                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                       ),
+                     ),
+                     
+                     const SizedBox(height: 40),
+                     _isLoading
+                         ? const Center(child: CircularProgressIndicator())
+                         : ElevatedButton(
+                             onPressed: _addContent,
+                             style: ElevatedButton.styleFrom(
+                               minimumSize: const Size(double.infinity, 55),
+                               backgroundColor: Colors.purple.shade900,
+                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                               elevation: 5,
+                             ),
+                             child: const Text("Publish Content", style: TextStyle(color: Colors.white, fontFamily: "Poppins", fontSize: 18)),
+                           ),
+                   ],
+                 ),
+               ),
+             ],
+           ),
         ),
       ),
     );

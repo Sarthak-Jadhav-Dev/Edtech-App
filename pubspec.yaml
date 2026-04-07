@@ -19,6 +19,13 @@ dependencies:
   supabase_flutter: ^2.8.1
   lottie: ^3.3.2
   url_launcher: ^6.3.0
+  google_sign_in: ^6.2.2
+  firebase_storage: ^12.4.10
+  file_picker: ^11.0.1
+  youtube_player_flutter: ^9.1.1
+  google_generative_ai: ^0.4.7
+  flutter_animate: ^4.5.2
+  pinput: ^6.0.2
 
 dev_dependencies:
   flutter_test:
@@ -37,3 +44,4 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/lottie/

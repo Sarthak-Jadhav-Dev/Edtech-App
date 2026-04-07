@@ -51,7 +51,7 @@ class _EnrollUserScreenState extends State<EnrollUserScreen> {
     
     if (success) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("\${data['firstName']} enrolled successfully!")));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${data['firstName']} enrolled successfully!")));
         Navigator.pop(context);
       }
     } else {
@@ -63,48 +63,82 @@ class _EnrollUserScreenState extends State<EnrollUserScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.purple.shade50,
-      appBar: AppBar(title: const Text("Enroll User", style: TextStyle(fontFamily: "Poppins")), backgroundColor: Colors.transparent),
+      appBar: AppBar(
+        title: const Text("Enroll Student", style: TextStyle(fontFamily: "Poppins", color: Colors.black)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  )
+                ],
+              ),
+              padding: const EdgeInsets.all(25.0),
+              child: Column(
+                children: [
+                  TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      hintText: "Enter user email",
+                      labelText: "Student Email",
+                      prefixIcon: Icon(Icons.email, color: Colors.purple.shade400),
                       filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
+                      fillColor: Colors.purple.shade50.withOpacity(0.5),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                CircleAvatar(
-                  backgroundColor: Colors.purple.shade900,
-                  child: IconButton(
-                    icon: const Icon(Icons.search, color: Colors.white),
-                    onPressed: _search,
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                      onPressed: _isLoading ? null : _search,
+                      icon: const Icon(Icons.search, color: Colors.white),
+                      label: const Text("Find Student", style: TextStyle(color: Colors.white, fontFamily: "Poppins", fontSize: 16)),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 50),
+                        backgroundColor: Colors.purple.shade900,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      ),
                   ),
-                )
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
-            if (_isLoading) const CircularProgressIndicator(),
-            if (_message.isNotEmpty) Text(_message, style: const TextStyle(color: Colors.red, fontFamily: "Sans")),
+            const SizedBox(height: 30),
+            if (_isLoading) const Center(child: CircularProgressIndicator()),
+            if (_message.isNotEmpty) Center(child: Text(_message, style: const TextStyle(color: Colors.red, fontFamily: "Sans", fontSize: 16))),
             if (_foundUser != null) ...[
+              const Text("Search Result", style: TextStyle(fontFamily: "Poppins", fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
               Card(
+                elevation: 4,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 child: ListTile(
-                  leading: const CircleAvatar(child: Icon(Icons.person)),
-                  title: Text("\${_foundUser!['firstName']} \${_foundUser!['lastName']}", style: const TextStyle(fontFamily: "Sans", fontWeight: FontWeight.bold)),
-                  subtitle: Text("Role: \${_foundUser!['userType']}", style: const TextStyle(fontFamily: "Sans")),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.purple.shade100,
+                    radius: 25,
+                    child: Icon(Icons.person, color: Colors.purple.shade900, size: 30),
+                  ),
+                  title: Text("${_foundUser!['firstName']} ${_foundUser!['lastName']}", style: const TextStyle(fontFamily: "Poppins", fontWeight: FontWeight.bold, fontSize: 18)),
+                  subtitle: Text("Role: ${_foundUser!['userType']}", style: const TextStyle(fontFamily: "Sans")),
                   trailing: ElevatedButton(
-                    onPressed: _enroll,
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.purple.shade700),
-                    child: const Text("Enroll", style: TextStyle(color: Colors.white)),
+                    onPressed: _isLoading ? null : _enroll,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green.shade600,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    ),
+                    child: const Text("Enroll", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                 ),
               )
