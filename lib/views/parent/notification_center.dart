@@ -59,7 +59,7 @@ class NotificationCenter extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                   Icon(Icons.notifications_none, size: 80, color: Colors.purple.withOpacity(0.2)),
+                   Icon(Icons.notifications_none, size: 80, color: Colors.purple.withValues(alpha: 0.2)),
                    const SizedBox(height: 20),
                    const Text("No notifications yet", style: TextStyle(fontFamily: "Sans", color: Colors.grey, fontSize: 16)),
                    const Padding(
@@ -84,7 +84,7 @@ class NotificationCenter extends StatelessWidget {
               return Card(
                 elevation: isRead ? 0 : 4,
                 margin: const EdgeInsets.only(bottom: 12),
-                color: isRead ? Colors.white.withOpacity(0.8) : Colors.white,
+                color: isRead ? Colors.white.withValues(alpha: 0.8) : Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 child: InkWell(
                   onTap: () => NotificationService().markAsRead(nId),
@@ -95,7 +95,7 @@ class NotificationCenter extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CircleAvatar(
-                          backgroundColor: _getColor(type).withOpacity(0.1),
+                          backgroundColor: _getColor(type).withValues(alpha: 0.1),
                           child: Icon(_getIcon(type), color: _getColor(type), size: 20),
                         ),
                         const SizedBox(width: 15),

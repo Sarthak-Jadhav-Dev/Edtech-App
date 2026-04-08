@@ -32,7 +32,7 @@ class ChildClassDetailScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.purple.shade50,
         appBar: AppBar(
-          title: Text("${childName}'s Course", style: const TextStyle(fontFamily: "Poppins", fontSize: 18, color: Colors.black)),
+          title: Text("$childName's Course", style: const TextStyle(fontFamily: "Poppins", fontSize: 18, color: Colors.black)),
           backgroundColor: Colors.white,
           elevation: 1,
           iconTheme: const IconThemeData(color: Colors.black),

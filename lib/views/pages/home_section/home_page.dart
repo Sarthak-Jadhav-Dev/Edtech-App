@@ -253,7 +253,7 @@ class _HomeSectionState extends State<HomeSection> {
         width: 150,
         height: 60,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(20.0),
         ),
         child: Center(

@@ -8,81 +8,30 @@ class AuthService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  // ─── Dummy Email (Phone -> Email mapped) Login ──────────────────────────
+  // ─── Email & Password Authentication ──────────────────────────────────────
 
-  Future<User?> loginWithPhone(String phone, String password) async {
-    try {
-      final userCredential = await _auth.signInWithEmailAndPassword(
-        email: '$phone@kte.app',
-        password: password,
-      );
-      return userCredential.user;
-    } catch (e) {
-      debugPrint('Login Error: ${e.toString()}');
-      return null;
-    }
-  }
-
-  // ─── Phone OTP & Dummy Email Registration ───────────────────────────────
-
-  Future<void> sendOTP({
-    required String phone,
-    required Function(String verificationId) onCodeSent,
-    required Function(String error) onError,
-  }) async {
-    await _auth.verifyPhoneNumber(
-      phoneNumber: '+91$phone',
-      verificationCompleted: (PhoneAuthCredential credential) {},
-      verificationFailed: (FirebaseAuthException e) {
-        debugPrint('Verification Failed: ${e.code} - ${e.message}');
-        String errorMessage = e.message ?? 'Verification failed';
-        if (e.code == 'invalid-phone-number') {
-          errorMessage = 'The provided phone number is not valid.';
-        }
-        onError(errorMessage);
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        onCodeSent(verificationId);
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {},
-    );
-  }
-
-  Future<User?> verifyOTPAndSignUp({
-    required String verificationId,
-    required String smsCode,
-    required String phone,
+  Future<User?> signUpWithEmail({
+    required String email,
     required String password,
     required String firstName,
     required String lastName,
     required String userType,
   }) async {
     try {
-      // 1. Verify OTP
-      final credential = PhoneAuthProvider.credential(
-        verificationId: verificationId,
-        smsCode: smsCode,
-      );
-      final phoneUser = await _auth.signInWithCredential(credential);
-
-      // 2. Delete temporary phone user to avoid auth conflicts
-      await phoneUser.user?.delete();
-
-      // 3. Create dummy email account for password logins
+      // 1. Create account
       final userCredential = await _auth.createUserWithEmailAndPassword(
-        email: '$phone@kte.app',
-        password: password,
+        email: email.trim(),
+        password: password.trim(),
       );
 
       final user = userCredential.user;
 
-      // 4. Save to Firestore
+      // 2. Save to Firestore
       if (user != null) {
         await _db.collection('users').doc(user.uid).set({
-          'firstName': firstName,
-          'lastName': lastName,
-          'email': '$phone@kte.app',
-          'phoneNumber': phone,
+          'firstName': firstName.trim(),
+          'lastName': lastName.trim(),
+          'email': email.trim(),
           'userType': userType,
           'createdAt': Timestamp.now(),
           'photoUrl': null,
@@ -99,6 +48,28 @@ class AuthService {
       throw Exception('An unknown error occurred.');
     }
   }
+
+  Future<User?> loginWithEmail(String email, String password) async {
+    try {
+      final userCredential = await _auth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password.trim(),
+      );
+      return userCredential.user;
+    } on FirebaseAuthException catch (e) {
+      debugPrint('Login Error: ${e.code} - ${e.message}');
+      String message = 'Login Failed';
+      if (e.code == 'user-not-found') message = 'No user found with this email.';
+      else if (e.code == 'wrong-password') message = 'Incorrect password.';
+      else if (e.code == 'invalid-email') message = 'The email address is invalid.';
+      
+      throw Exception(message);
+    } catch (e) {
+      debugPrint('Login Error: $e');
+      throw Exception('An unknown error occurred.');
+    }
+  }
+
 
   // ─── Google Sign-In ───────────────────────────────────────────────────────
   //

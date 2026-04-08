@@ -3,8 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 class AiQuizEvaluator {
-  // TODO: Use flutter_dotenv or secure secret management
-  static const String _apiKey = 'YOUR_GEMINI_API_KEY_HERE';
+  static const String _apiKey = 'AIzaSyAgAPcL2ITodk_UnfL4-ezpAi1mYURBl3o';
   
   static Future<Map<String, dynamic>?> generateInsights({
     required List<Map<String, dynamic>> questions,

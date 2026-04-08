@@ -196,7 +196,7 @@ class _WidgetTreeState extends State<WidgetTree> {
           } catch (e) {
             debugPrint("Logout error: $e");
           }
-          if (mounted) {
+          if (context.mounted) {
             Navigator.pushAndRemoveUntil(
               context, 
               MaterialPageRoute(builder: (_) => const Login()), 

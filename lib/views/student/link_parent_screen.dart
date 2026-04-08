@@ -362,38 +362,40 @@ class _LinkParentScreenState extends State<LinkParentScreen>
     }
 
     if (_linkedParents.isEmpty) {
-      return Column(
-        children: [
-          Lottie.asset(
-            'assets/lottie/no_parent.json',
-            height: 200,
-            fit: BoxFit.contain,
-            errorBuilder: (ctx, err, _) => Icon(
-              Icons.family_restroom_outlined,
-              size: 100,
-              color: Colors.grey.withOpacity(0.3),
+      return Center(
+        child: Column(
+          children: [
+            Lottie.asset(
+              'assets/lottie/no_parent.json',
+              height: 200,
+              fit: BoxFit.contain,
+              errorBuilder: (ctx, err, _) => Icon(
+                Icons.family_restroom_outlined,
+                size: 100,
+                color: Colors.grey.withOpacity(0.3),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "No parents linked yet",
-            style: TextStyle(
-              color: Colors.black54,
-              fontFamily: "Poppins",
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
+            const SizedBox(height: 8),
+            Text(
+              "No parents linked yet",
+              style: TextStyle(
+                color: Colors.black54,
+                fontFamily: "Poppins",
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            "Search by email below to connect a parent.",
-            style: TextStyle(
-              color: Colors.grey.shade600,
-              fontFamily: "Sans",
-              fontSize: 13,
+            const SizedBox(height: 4),
+            Text(
+              "Search by email below to connect a parent.",
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontFamily: "Sans",
+                fontSize: 13,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 

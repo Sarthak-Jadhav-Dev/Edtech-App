@@ -33,9 +33,16 @@ class ChildQuizInsights extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.analytics_outlined, size: 80, color: Colors.purple.shade200),
+                Icon(
+                  Icons.analytics_outlined,
+                  size: 80,
+                  color: Colors.purple.shade200,
+                ),
                 const SizedBox(height: 16),
-                const Text("No quizzes taken yet.", style: TextStyle(fontSize: 18, color: Colors.grey)),
+                const Text(
+                  "No quizzes taken yet.",
+                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                ),
               ],
             ),
           );
@@ -58,17 +65,31 @@ class ChildQuizInsights extends StatelessWidget {
             return Card(
               elevation: 3,
               margin: const EdgeInsets.only(bottom: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
               child: ExpansionTile(
-                tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                tilePadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 leading: CircleAvatar(
-                  backgroundColor: scoreColor.withOpacity(0.1),
+                  backgroundColor: scoreColor.withValues(alpha: 0.1),
                   child: Text(
                     "${percentage.toInt()}%",
-                    style: TextStyle(color: scoreColor, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: scoreColor,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                title: Text("Quiz Attempt", style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: "Poppins")),
+                title: Text(
+                  "Quiz Attempt",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontFamily: "Poppins",
+                  ),
+                ),
                 subtitle: Text(
                   "Time taken: ${(timeTaken / 60).floor()}m ${timeTaken % 60}s",
                   style: const TextStyle(fontSize: 12),
@@ -81,7 +102,10 @@ class ChildQuizInsights extends StatelessWidget {
                         ? const Center(
                             child: Text(
                               "AI Insight is being generated...",
-                              style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontStyle: FontStyle.italic,
+                              ),
                             ),
                           )
                         : _buildInsightsView(insights),
@@ -97,7 +121,9 @@ class ChildQuizInsights extends StatelessWidget {
 
   Widget _buildInsightsView(Map<String, dynamic> insights) {
     final parentRemarks = insights['parentRemarks'] ?? "No remark available.";
-    final understoodTopics = List<String>.from(insights['understoodTopics'] ?? []);
+    final understoodTopics = List<String>.from(
+      insights['understoodTopics'] ?? [],
+    );
     final focusTopics = List<String>.from(insights['focusTopics'] ?? []);
 
     return Column(
@@ -119,7 +145,11 @@ class ChildQuizInsights extends StatelessWidget {
               Expanded(
                 child: Text(
                   parentRemarks,
-                  style: TextStyle(fontFamily: "Sans", color: Colors.blue.shade900, height: 1.4),
+                  style: TextStyle(
+                    fontFamily: "Sans",
+                    color: Colors.blue.shade900,
+                    height: 1.4,
+                  ),
                 ),
               ),
             ],
@@ -128,29 +158,61 @@ class ChildQuizInsights extends StatelessWidget {
         const SizedBox(height: 20),
 
         if (understoodTopics.isNotEmpty) ...[
-          const Text("🌟 Strengths", style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "Poppins")),
+          const Text(
+            "🌟 Strengths",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontFamily: "Poppins",
+            ),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: understoodTopics.map((t) => Chip(
-              label: Text(t, style: TextStyle(color: Colors.green.shade800, fontSize: 12)),
-              backgroundColor: Colors.green.shade50,
-            )).toList(),
+            children: understoodTopics
+                .map(
+                  (t) => Chip(
+                    label: Text(
+                      t,
+                      style: TextStyle(
+                        color: Colors.green.shade800,
+                        fontSize: 12,
+                      ),
+                    ),
+                    backgroundColor: Colors.green.shade50,
+                  ),
+                )
+                .toList(),
           ),
           const SizedBox(height: 16),
         ],
 
         if (focusTopics.isNotEmpty) ...[
-          const Text("🎯 Focus Needed", style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "Poppins")),
+          const Text(
+            "🎯 Focus Needed",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontFamily: "Poppins",
+            ),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: focusTopics.map((t) => Chip(
-              label: Text(t, style: TextStyle(color: Colors.orange.shade900, fontSize: 12)),
-              backgroundColor: Colors.orange.shade50,
-            )).toList(),
+            children: focusTopics
+                .map(
+                  (t) => Chip(
+                    label: Text(
+                      t,
+                      style: TextStyle(
+                        color: Colors.orange.shade900,
+                        fontSize: 12,
+                      ),
+                    ),
+                    backgroundColor: Colors.orange.shade50,
+                  ),
+                )
+                .toList(),
           ),
         ],
       ],

@@ -138,7 +138,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 title: "Push Notifications",
                 subtitle: "Manage alert preferences",
                 onTap: () {},
-                trailing: Switch(value: true, onChanged: (v){}, activeColor: Colors.purple),
+                trailing: Switch(value: true, onChanged: (v){}, activeThumbColor: Colors.purple),
               ),
               const SizedBox(height: 40),
               _buildSectionHeader("Advanced"),
@@ -185,7 +185,7 @@ class _SettingsPageState extends State<SettingsPage> {
         onTap: onTap,
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         leading: CircleAvatar(
-          backgroundColor: (color ?? Colors.purple).withOpacity(0.1),
+          backgroundColor: (color ?? Colors.purple).withValues(alpha: 0.1),
           child: Icon(icon, color: color ?? Colors.purple, size: 20),
         ),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: "Sans")),

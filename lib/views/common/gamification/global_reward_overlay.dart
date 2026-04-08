@@ -23,7 +23,7 @@ class _GlobalRewardOverlayState extends State<GlobalRewardOverlay> {
     "You're on fire! 🔥",
     "Brain power +10! 🧠",
     "Super smart! ⭐",
-    "Keep it up! 🎯"
+    "Keep it up! 🎯",
   ];
 
   @override
@@ -75,7 +75,7 @@ class _GlobalRewardOverlayState extends State<GlobalRewardOverlay> {
     return Stack(
       children: [
         widget.child,
-        
+
         // Active Toasts
         if (_activeToasts.isNotEmpty)
           Positioned(
@@ -84,7 +84,15 @@ class _GlobalRewardOverlayState extends State<GlobalRewardOverlay> {
             right: 0,
             child: Column(
               children: _activeToasts.map((event) {
-                return _buildToast(event).animate().slideY(begin: -1, end: 0, duration: 400.ms, curve: Curves.easeOutBack).fadeIn();
+                return _buildToast(event)
+                    .animate()
+                    .slideY(
+                      begin: -1,
+                      end: 0,
+                      duration: 400.ms,
+                      curve: Curves.easeOutBack,
+                    )
+                    .fadeIn();
               }).toList(),
             ),
           ),
@@ -98,8 +106,15 @@ class _GlobalRewardOverlayState extends State<GlobalRewardOverlay> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.military_tech, size: 150, color: Colors.amber)
-                        .animate(onPlay: (controller) => controller.repeat(reverse: true))
+                    const Icon(
+                          Icons.military_tech,
+                          size: 150,
+                          color: Colors.amber,
+                        )
+                        .animate(
+                          onPlay: (controller) =>
+                              controller.repeat(reverse: true),
+                        )
                         .scaleXY(begin: 0.8, end: 1.2, duration: 800.ms)
                         .shimmer(duration: 1.seconds),
                     const SizedBox(height: 20),
@@ -110,7 +125,13 @@ class _GlobalRewardOverlayState extends State<GlobalRewardOverlay> {
                         fontSize: 48,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
-                        shadows: [Shadow(color: Colors.orange, blurRadius: 10, offset: Offset(0, 4))],
+                        shadows: [
+                          Shadow(
+                            color: Colors.orange,
+                            blurRadius: 10,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
                       ),
                     ).animate().slideY(begin: 1, end: 0).fadeIn(),
                   ],
@@ -144,7 +165,12 @@ class _GlobalRewardOverlayState extends State<GlobalRewardOverlay> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.15), spreadRadius: 2, blurRadius: 10, offset: const Offset(0, 5)),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
         ],
       ),
       child: Row(
@@ -152,7 +178,10 @@ class _GlobalRewardOverlayState extends State<GlobalRewardOverlay> {
         children: [
           Icon(iconData, color: color, size: 28),
           const SizedBox(width: 10),
-          Text(text, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(
+            text,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
         ],
       ),
     );

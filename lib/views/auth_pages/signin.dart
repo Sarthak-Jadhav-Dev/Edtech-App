@@ -16,7 +16,7 @@ class LoginForm extends StatefulWidget {
 class _LoginFormState extends State<LoginForm> {
   final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _phone = TextEditingController();
+  final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
 
   bool _isLoading = false;
@@ -24,7 +24,7 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   void dispose() {
-    _phone.dispose();
+    _email.dispose();
     _password.dispose();
     super.dispose();
   }
@@ -35,10 +35,7 @@ class _LoginFormState extends State<LoginForm> {
     setState(() => _isGoogleLoading = true);
     try {
       final result = await _authService.signInWithGoogle();
-      if (result == null) {
-        // User cancelled
-        return;
-      }
+      if (result == null) return;
 
       final user = result['user'];
       final isNewUser = result['isNewUser'] as bool;
@@ -46,10 +43,8 @@ class _LoginFormState extends State<LoginForm> {
       if (!mounted) return;
 
       if (isNewUser) {
-        // New Google user — ask them to choose a role
         final selectedRole = await _showRoleDialog(context);
         if (selectedRole == null) {
-          // They dismissed without picking — sign them out to avoid a broken state
           await _authService.logout();
           return;
         }
@@ -76,14 +71,14 @@ class _LoginFormState extends State<LoginForm> {
     }
   }
 
-  // ─── Phone Login Handler ───────────────────────────────────────────────────
+  // ─── Email Login Handler ───────────────────────────────────────────────────
 
-  Future<void> _handlePhoneLogin() async {
+  Future<void> _handleEmailLogin() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     try {
-      final user = await _authService.loginWithPhone(
-        _phone.text.trim(),
+      final user = await _authService.loginWithEmail(
+        _email.text.trim(),
         _password.text.trim(),
       );
 
@@ -94,12 +89,15 @@ class _LoginFormState extends State<LoginForm> {
           context,
           MaterialPageRoute(builder: (_) => const WidgetTree()),
         );
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please check your credentials')),
-        );
       }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll('Exception: ', '')),
+          backgroundColor: Colors.red.shade700,
+        ),
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -159,8 +157,8 @@ class _LoginFormState extends State<LoginForm> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         title: const Text(
-          'Get Started..',
-          style: TextStyle(fontFamily: 'Poppins'),
+          'Welcome Back',
+          style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
@@ -187,8 +185,12 @@ class _LoginFormState extends State<LoginForm> {
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.asset('assets/images/HappyFaces.png'),
+                    borderRadius: BorderRadius.circular(24),
+                    child: Image.asset(
+                      'assets/images/HappyFaces.png',
+                      height: 200,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
@@ -196,27 +198,33 @@ class _LoginFormState extends State<LoginForm> {
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 12),
+                    horizontal: 24, vertical: 20),
                 decoration: BoxDecoration(
-                  color: Colors.purple.shade50,
-                  borderRadius: BorderRadius.circular(40),
+                  color: Colors.white.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: Colors.white, width: 2),
                 ),
                 child: Column(
                   children: [
                     const Text(
-                      'Login',
+                      'Login to Continue',
                       style: TextStyle(
                         fontFamily: 'Poppins',
-                        fontSize: 20,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 10),
+                    const Text(
+                      'Access your personalized learning world',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontFamily: 'Sans', color: Colors.black54),
+                    ),
+                    const SizedBox(height: 25),
 
                     // ── Google Sign-In Button ──────────────────────────────
                     OutlinedButton.icon(
-                      onPressed:
-                          _isGoogleLoading ? null : _handleGoogleSignIn,
+                      onPressed: _isGoogleLoading ? null : _handleGoogleSignIn,
                       icon: _isGoogleLoading
                           ? const SizedBox(
                               width: 18,
@@ -230,130 +238,130 @@ class _LoginFormState extends State<LoginForm> {
                                   const Icon(Icons.g_mobiledata, size: 22),
                             ),
                       label: const Text(
-                        'Log in with Google',
-                        style: TextStyle(fontFamily: 'Sans'),
+                        'Continue with Google',
+                        style: TextStyle(fontFamily: 'Sans', fontWeight: FontWeight.w600),
                       ),
                       style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(300, 50),
-                        side: const BorderSide(color: Colors.black, width: 1),
-                        shape: const StadiumBorder(),
-                        backgroundColor: Colors.purple.shade50,
+                        minimumSize: const Size(double.infinity, 55),
+                        side: const BorderSide(color: Colors.black12, width: 1.5),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        backgroundColor: Colors.white,
                       ),
                     ),
 
-                    const SizedBox(height: 10),
-                    const Text('or', style: TextStyle(fontFamily: 'Sans')),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: Colors.grey.shade300)),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12),
+                          child: Text('or use email', style: TextStyle(fontFamily: 'Sans', color: Colors.black38)),
+                        ),
+                        Expanded(child: Divider(color: Colors.grey.shade300)),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
 
-                    // ── Phone / Password Form ──────────────────────────────
+                    // ── Email / Password Form ──────────────────────────────
                     Form(
                       key: _formKey,
                       child: Column(
                         children: [
-                          SizedBox(
-                            width: 300,
-                            child: TextFormField(
-                              controller: _phone,
-                              keyboardType: TextInputType.phone,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                                LengthLimitingTextInputFormatter(10),
-                              ],
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white60,
-                                hintText: 'Phone Number (10 digits)',
-                                prefixText: '+91 ',
-                                prefixStyle: const TextStyle(
-                                  fontFamily: 'Sans',
-                                  color: Colors.black87,
-                                  fontSize: 16,
-                                ),
-                                hintStyle: const TextStyle(
-                                  fontFamily: 'Sans',
-                                  color: Colors.black54,
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(40),
-                                  borderSide: BorderSide.none,
-                                ),
+                          TextFormField(
+                            controller: _email,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white.withValues(alpha: 0.8),
+                              hintText: 'Email Address',
+                              prefixIcon: const Icon(Icons.email_outlined),
+                              hintStyle: const TextStyle(fontFamily: 'Sans', color: Colors.black38),
+                              contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your phone number';
-                                }
-                                if (value.length != 10) {
-                                  return 'Must be 10 digits';
-                                }
-                                return null;
-                              },
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: Colors.purple.shade300, width: 2),
+                              ),
                             ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) return 'Please enter your email';
+                              if (!value.contains('@')) return 'Enter a valid email';
+                              return null;
+                            },
                           ),
-                          const SizedBox(height: 10),
-                          SizedBox(
-                            width: 300,
-                            child: TextFormField(
-                              controller: _password,
-                              obscureText: true,
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white60,
-                                hintText: 'Password',
-                                hintStyle: const TextStyle(
-                                  fontFamily: 'Sans',
-                                  color: Colors.black54,
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(40),
-                                  borderSide: BorderSide.none,
-                                ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _password,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white.withValues(alpha: 0.8),
+                              hintText: 'Password',
+                              prefixIcon: const Icon(Icons.lock_outline_rounded),
+                              hintStyle: const TextStyle(fontFamily: 'Sans', color: Colors.black38),
+                              contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your password';
-                                }
-                                return null;
-                              },
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: Colors.purple.shade300, width: 2),
+                              ),
                             ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) return 'Please enter your password';
+                              if (value.length < 6) return 'At least 6 characters';
+                              return null;
+                            },
                           ),
                         ],
                       ),
                     ),
 
-                    const SizedBox(height: 15),
+                    const SizedBox(height: 25),
 
-                    // ── Phone Login Submit ─────────────────────────────────
+                    // ── Login Submit ─────────────────────────────────
                     _isLoading
                         ? const CircularProgressIndicator()
-                        : OutlinedButton(
-                            onPressed: _handlePhoneLogin,
-                            style: OutlinedButton.styleFrom(
-                              minimumSize: const Size(300, 50),
-                              side: const BorderSide(
-                                  color: Colors.black54, width: 1),
-                              shape: const StadiumBorder(),
-                              backgroundColor: Colors.purple.shade900,
-                            ),
-                            child: const Text(
-                              'Log in',
-                              style: TextStyle(
-                                fontFamily: 'Sans',
-                                color: Colors.white70,
+                        : SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _handleEmailLogin,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.purple.shade900,
+                                padding: const EdgeInsets.symmetric(vertical: 18),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                elevation: 4,
+                                shadowColor: Colors.purple.shade200,
+                              ),
+                              child: const Text(
+                                'Login',
+                                style: TextStyle(
+                                  fontFamily: 'Sans',
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
 
-                    const SizedBox(height: 10),
-                    const SizedBox(
-                      width: 300,
-                      child: Text(
-                        'Logging in for our Services means you agree to our Terms of Service and Privacy Policy',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Sans',
-                          color: Colors.black54,
-                        ),
-                      ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Terms of Service & Privacy Policy apply',
+                      style: TextStyle(fontFamily: 'Sans', color: Colors.black38, fontSize: 12),
                     ),
                   ],
                 ),
@@ -365,6 +373,7 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 }
+
 
 // ─── Role Chip Widget ──────────────────────────────────────────────────────────
 

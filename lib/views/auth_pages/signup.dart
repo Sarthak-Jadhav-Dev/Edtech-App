@@ -5,7 +5,6 @@ import 'package:kte/views/pages/login.dart';
 import 'package:kte/views/widget_tree.dart';
 import 'package:kte/services/firestore_service.dart' as kte_firestore;
 import 'package:kte/services/app_state.dart';
-import 'package:pinput/pinput.dart';
 
 class RegisterForm extends StatefulWidget {
   const RegisterForm({super.key});
@@ -17,7 +16,7 @@ class RegisterForm extends StatefulWidget {
 class _RegisterFormState extends State<RegisterForm> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _parentEmailController = TextEditingController();
 
@@ -30,7 +29,7 @@ class _RegisterFormState extends State<RegisterForm> {
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
-    _phoneController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     _parentEmailController.dispose();
     super.dispose();
@@ -42,7 +41,7 @@ class _RegisterFormState extends State<RegisterForm> {
     setState(() => _isGoogleLoading = true);
     try {
       final result = await AuthService().signInWithGoogle();
-      if (result == null) return; // cancelled
+      if (result == null) return; 
 
       final user = result['user'];
       final isNewUser = result['isNewUser'] as bool;
@@ -50,24 +49,12 @@ class _RegisterFormState extends State<RegisterForm> {
       if (!mounted) return;
 
       if (isNewUser) {
-        // New user — ask for a role
         final selectedRole = await _showRoleDialog(context);
         if (selectedRole == null) {
           await AuthService().logout();
           return;
         }
         await AuthService().setUserRole(user.uid, selectedRole);
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Account created with Google ✅')),
-        );
-      } else {
-        // Existing user signed in via Google — just continue
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Welcome back! Signing you in…')),
-        );
       }
 
       await AppState.setNotFirstTime();
@@ -90,6 +77,66 @@ class _RegisterFormState extends State<RegisterForm> {
     }
   }
 
+  // ─── Email Sign-Up Handler ──────────────────────────────────────────────
+
+  Future<void> _handleEmailSignUp() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final parentEmail = _parentEmailController.text.trim();
+
+    if (email.isEmpty || password.isEmpty || firstName.isEmpty || lastName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all required fields')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final user = await AuthService().signUpWithEmail(
+        email: email,
+        password: password,
+        firstName: firstName,
+        lastName: lastName,
+        userType: selectedUserType,
+      );
+
+      if (user != null) {
+        // Handle Parent Linking for Students
+        if (selectedUserType == 'Student' && parentEmail.isNotEmpty) {
+          try {
+            final parentDoc = await kte_firestore.FirestoreService().searchUserByEmail(parentEmail);
+            if (parentDoc != null && (parentDoc.data() as Map<String, dynamic>)['userType'] == 'Parent') {
+              await kte_firestore.FirestoreService().linkParentToStudent(user.uid, parentDoc.id);
+            }
+          } catch (e) {
+            debugPrint("Parent linking search failed: $e");
+          }
+        }
+
+        await AppState.setNotFirstTime();
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const WidgetTree()),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll('Exception: ', '')),
+          backgroundColor: Colors.red.shade700,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   // ─── Role Selection Dialog ─────────────────────────────────────────────────
 
   Future<String?> _showRoleDialog(BuildContext context) {
@@ -98,13 +145,8 @@ class _RegisterFormState extends State<RegisterForm> {
       barrierDismissible: false,
       builder: (ctx) {
         return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: const Text(
-            'Choose your role',
-            style: TextStyle(
-                fontFamily: 'Poppins', fontWeight: FontWeight.bold),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: const Text('Choose your role', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold)),
           content: const Text(
             'Please select the role that best describes you so we can personalise your experience.',
             style: TextStyle(fontFamily: 'Sans'),
@@ -135,69 +177,6 @@ class _RegisterFormState extends State<RegisterForm> {
     );
   }
 
-  // ─── Phone Registration Verification Flow ──────────────────────────────────
-
-  Future<void> _handlePhoneRegistrationStart() async {
-    final phone = _phoneController.text.trim();
-    final password = _passwordController.text.trim();
-    final firstName = _firstNameController.text.trim();
-    final lastName = _lastNameController.text.trim();
-
-    if (phone.isEmpty ||
-        password.isEmpty ||
-        firstName.isEmpty ||
-        lastName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all required fields')),
-      );
-      return;
-    }
-    if (phone.length != 10) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid 10-digit phone number')),
-      );
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    await AuthService().sendOTP(
-      phone: phone,
-      onCodeSent: (verificationId) {
-        if (mounted) setState(() => _isLoading = false);
-        _showOTPBottomSheet(verificationId);
-      },
-      onError: (error) {
-        if (mounted) {
-          setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(error),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      },
-    );
-  }
-
-  void _showOTPBottomSheet(String verificationId) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _OTPBottomSheetContent(
-        verificationId: verificationId,
-        phone: _phoneController.text.trim(),
-        password: _passwordController.text.trim(),
-        firstName: _firstNameController.text.trim(),
-        lastName: _lastNameController.text.trim(),
-        userType: selectedUserType,
-        parentEmail: _parentEmailController.text.trim(),
-      ),
-    );
-  }
-
   // ─── Build ─────────────────────────────────────────────────────────────────
 
   @override
@@ -207,10 +186,7 @@ class _RegisterFormState extends State<RegisterForm> {
       backgroundColor: Colors.purple.shade50,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: const Text(
-          'Get Started..',
-          style: TextStyle(fontFamily: 'Poppins'),
-        ),
+        title: const Text('Create Account', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold)),
         centerTitle: true,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         elevation: 0,
@@ -229,36 +205,40 @@ class _RegisterFormState extends State<RegisterForm> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              const SizedBox(height: 10),
               Hero(
                 tag: 'Hello',
                 child: Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.asset('assets/images/HappyFaces.png'),
+                    borderRadius: BorderRadius.circular(24),
+                    child: Image.asset('assets/images/HappyFaces.png', height: 160, fit: BoxFit.cover),
                   ),
                 ),
               ),
               const SizedBox(height: 20),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.purple.shade50,
+                    color: Colors.white.withValues(alpha: 0.6),
                     borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: Colors.white, width: 2),
                   ),
                   child: Column(
                     children: [
                       const Text(
-                        'Create Account',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Sans',
-                        ),
+                        'Join Our Community',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Start your journey with hands-on learning',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontFamily: 'Sans', color: Colors.black54),
+                      ),
+                      const SizedBox(height: 25),
 
                       // ── Google Sign-Up Button ──────────────────────────
                       OutlinedButton.icon(
@@ -267,204 +247,170 @@ class _RegisterFormState extends State<RegisterForm> {
                             ? const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2),
+                                child: CircularProgressIndicator(strokeWidth: 2),
                               )
                             : Image.asset(
                                 'assets/images/google_logo.png',
                                 height: 20,
-                                errorBuilder: (_, __, ___) =>
-                                    const Icon(Icons.g_mobiledata, size: 22),
+                                errorBuilder: (_, __, ___) => const Icon(Icons.g_mobiledata, size: 22),
                               ),
-                        label: const Text(
-                          'Continue with Google',
-                          style: TextStyle(fontFamily: 'Sans'),
-                        ),
+                        label: const Text('Continue with Google', style: TextStyle(fontFamily: 'Sans', fontWeight: FontWeight.w600)),
                         style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 50),
-                          side: const BorderSide(color: Colors.black, width: 1),
-                          shape: const StadiumBorder(),
+                          minimumSize: const Size(double.infinity, 55),
+                          side: const BorderSide(color: Colors.black12, width: 1.5),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           backgroundColor: Colors.white,
                         ),
                       ),
 
-                      const SizedBox(height: 16),
-
-                      // ── Divider ────────────────────────────────────────
+                      const SizedBox(height: 20),
                       Row(
                         children: [
-                          Expanded(
-                              child: Divider(color: Colors.grey.shade400)),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 12),
-                            child: Text(
-                              'or create with email',
-                              style: TextStyle(
-                                  fontFamily: 'Sans',
-                                  color: Colors.grey.shade600,
-                                  fontSize: 12),
-                            ),
+                          Expanded(child: Divider(color: Colors.grey.shade300)),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            child: Text('or create with email', style: TextStyle(fontFamily: 'Sans', color: Colors.black38, fontSize: 12)),
                           ),
-                          Expanded(
-                              child: Divider(color: Colors.grey.shade400)),
+                          Expanded(child: Divider(color: Colors.grey.shade300)),
                         ],
                       ),
-
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       // ── Name Fields ────────────────────────────────────
                       Row(
                         children: [
                           Expanded(
-                            child: TextField(
+                            child: _buildTextField(
                               controller: _firstNameController,
-                              decoration: InputDecoration(
-                                hintText: 'First Name',
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                              ),
+                              hintText: 'First Name',
+                              icon: Icons.person_outline,
                             ),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: TextField(
+                            child: _buildTextField(
                               controller: _lastNameController,
-                              decoration: InputDecoration(
-                                hintText: 'Last Name',
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                              ),
+                              hintText: 'Last Name',
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 12),
 
-                      // ── Phone Number ───────────────────────────────────
-                      TextField(
-                        controller: _phoneController,
-                        keyboardType: TextInputType.phone,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(10),
-                        ],
-                        decoration: InputDecoration(
-                          hintText: 'Phone Number (10 digits)',
-                          prefixText: '+91 ',
-                          prefixStyle: const TextStyle(
-                            fontFamily: 'Sans',
-                            color: Colors.black87,
-                            fontSize: 16,
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
+                      // ── Email ──────────────────────────────────────────
+                      _buildTextField(
+                        controller: _emailController,
+                        hintText: 'Email Address',
+                        icon: Icons.email_outlined,
+                        keyboardType: TextInputType.emailAddress,
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 12),
 
                       // ── Password ───────────────────────────────────────
-                      TextField(
+                      _buildTextField(
                         controller: _passwordController,
+                        hintText: 'Password',
+                        icon: Icons.lock_outline_rounded,
                         obscureText: true,
-                        decoration: InputDecoration(
-                          hintText: 'Password',
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 12),
 
                       // ── Role Dropdown ──────────────────────────────────
-                      DropdownButtonFormField<String>(
-                        initialValue: selectedUserType,
-                        items: userTypes.map((type) {
-                          return DropdownMenuItem(
-                              value: type, child: Text(type));
-                        }).toList(),
-                        onChanged: (val) {
-                          setState(() {
-                            selectedUserType = val!;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButtonFormField<String>(
+                            value: selectedUserType,
+                            items: userTypes.map((type) {
+                              return DropdownMenuItem(value: type, child: Text(type, style: const TextStyle(fontFamily: 'Sans')));
+                            }).toList(),
+                            onChanged: (val) => setState(() => selectedUserType = val!),
+                            decoration: const InputDecoration(border: InputBorder.none),
                           ),
                         ),
                       ),
 
                       // ── Parent Email (students only) ───────────────────
                       if (selectedUserType == 'Student') ...[
-                        const SizedBox(height: 10),
-                        TextField(
+                        const SizedBox(height: 12),
+                        _buildTextField(
                           controller: _parentEmailController,
-                          decoration: InputDecoration(
-                            hintText: "Parent's Email (Optional)",
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
+                          hintText: "Parent's Email (Optional)",
+                          icon: Icons.family_restroom_outlined,
+                          keyboardType: TextInputType.emailAddress,
                         ),
                       ],
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 30),
 
                       // ── Register Button ────────────────────────────────
                       _isLoading
                           ? const CircularProgressIndicator()
-                          : OutlinedButton(
-                              onPressed: _handlePhoneRegistrationStart,
-                              style: OutlinedButton.styleFrom(
-                                minimumSize:
-                                    const Size(double.infinity, 50),
-                                backgroundColor: Colors.purple.shade900,
-                              ),
-                              child: const Text(
-                                'Register',
-                                style: TextStyle(color: Colors.white),
+                          : SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: _handleEmailSignUp,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.purple.shade900,
+                                  padding: const EdgeInsets.symmetric(vertical: 18),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                  elevation: 4,
+                                ),
+                                child: const Text(
+                                  'Create Account',
+                                  style: TextStyle(color: Colors.white, fontFamily: 'Sans', fontSize: 18, fontWeight: FontWeight.bold),
+                                ),
                               ),
                             ),
 
-                      const SizedBox(height: 10),
-                      const SizedBox(
-                        width: 300,
-                        child: Text(
-                          'Registering for our Services means you agree to our Terms of Service and Privacy Policy',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Sans',
-                            color: Colors.black54,
-                          ),
-                        ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'By joining, you agree to our Terms and Privacy Policy',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontFamily: 'Sans', color: Colors.black38, fontSize: 11),
                       ),
                     ],
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
       ),
     );
   }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    IconData? icon,
+    bool obscureText = false,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white.withValues(alpha: 0.8),
+        hintText: hintText,
+        prefixIcon: icon != null ? Icon(icon, size: 22) : null,
+        hintStyle: const TextStyle(fontFamily: 'Sans', color: Colors.black38),
+        contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.purple.shade300, width: 2)),
+      ),
+    );
+  }
 }
+
 
 // ─── Role Chip Widget ──────────────────────────────────────────────────────────
 
@@ -511,176 +457,4 @@ class _RoleChip extends StatelessWidget {
   }
 }
 
-// ─── OTP Bottom Sheet Widget ───────────────────────────────────────────────────
 
-class _OTPBottomSheetContent extends StatefulWidget {
-  final String verificationId;
-  final String phone;
-  final String password;
-  final String firstName;
-  final String lastName;
-  final String userType;
-  final String parentEmail;
-
-  const _OTPBottomSheetContent({
-    required this.verificationId,
-    required this.phone,
-    required this.password,
-    required this.firstName,
-    required this.lastName,
-    required this.userType,
-    required this.parentEmail,
-  });
-
-  @override
-  State<_OTPBottomSheetContent> createState() => _OTPBottomSheetContentState();
-}
-
-class _OTPBottomSheetContentState extends State<_OTPBottomSheetContent> {
-  final TextEditingController _otpController = TextEditingController();
-  bool _isVerifying = false;
-  String? _errorMessage;
-
-  Future<void> _verifyAndSubmit(String smsCode) async {
-    setState(() {
-      _isVerifying = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final user = await AuthService().verifyOTPAndSignUp(
-        verificationId: widget.verificationId,
-        smsCode: smsCode,
-        phone: widget.phone,
-        password: widget.password,
-        firstName: widget.firstName,
-        lastName: widget.lastName,
-        userType: widget.userType,
-      );
-
-      // Handle Parent Linking for Students
-      if (user != null &&
-          widget.userType == 'Student' &&
-          widget.parentEmail.isNotEmpty) {
-        final parentDoc = await kte_firestore.FirestoreService()
-            .searchUserByEmail(widget.parentEmail);
-        if (parentDoc != null &&
-            (parentDoc.data() as Map<String, dynamic>)['userType'] ==
-                'Parent') {
-          await kte_firestore.FirestoreService()
-              .linkParentToStudent(user.uid, parentDoc.id);
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Linked to Parent successfully!')),
-            );
-          }
-        }
-      }
-
-      if (mounted) {
-        Navigator.pop(context); // close sheet
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const WidgetTree()),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isVerifying = false;
-          _errorMessage = e.toString().replaceAll('Exception: ', '');
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final defaultPinTheme = PinTheme(
-      width: 56,
-      height: 56,
-      textStyle: const TextStyle(
-        fontSize: 22,
-        color: Colors.black87,
-        fontWeight: FontWeight.bold,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.purple.shade200, width: 2),
-      ),
-    );
-
-    return Container(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-        top: 30,
-        left: 20,
-        right: 20,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.purple.shade50,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'Enter Verification Code',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Poppins',
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'We have sent a 6-digit code to +91 ${widget.phone}',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 14,
-              fontFamily: 'Sans',
-              color: Colors.black54,
-            ),
-          ),
-          const SizedBox(height: 30),
-          Pinput(
-            length: 6,
-            controller: _otpController,
-            defaultPinTheme: defaultPinTheme,
-            focusedPinTheme: defaultPinTheme.copyWith(
-              decoration: defaultPinTheme.decoration!.copyWith(
-                border: Border.all(color: Colors.purple.shade900, width: 2),
-              ),
-            ),
-            errorPinTheme: defaultPinTheme.copyWith(
-              decoration: defaultPinTheme.decoration!.copyWith(
-                border: Border.all(color: Colors.red.shade400, width: 2),
-              ),
-            ),
-            onCompleted: _verifyAndSubmit,
-          ),
-          const SizedBox(height: 20),
-          if (_errorMessage != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: Text(
-                _errorMessage!,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.red.shade700,
-                  fontFamily: 'Sans',
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          if (_isVerifying)
-            const Padding(
-              padding: EdgeInsets.only(bottom: 20),
-              child: CircularProgressIndicator(),
-            ),
-        ],
-      ),
-    );
-  }
-}

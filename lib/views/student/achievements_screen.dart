@@ -180,7 +180,7 @@ class AchievementsScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             gradient: LinearGradient(
-                              colors: [_getBadgeColor(iconName).withOpacity(0.1), _getBadgeColor(iconName).withOpacity(0.05)],
+                              colors: [_getBadgeColor(iconName).withValues(alpha: 0.1), _getBadgeColor(iconName).withValues(alpha: 0.05)],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),

@@ -6,11 +6,16 @@ class ProgressDashboard extends StatelessWidget {
   const ProgressDashboard({super.key});
 
   String _getMotivationalText(double percentage) {
-    if (percentage == 0) return "Big journey ahead! Let's start with one video today.";
-    if (percentage < 20) return "Great start! Every small step counts on your learning path.";
-    if (percentage < 50) return "Keep going! You're making steady progress through your courses.";
-    if (percentage < 80) return "You're a star! Just a few more lessons left to completion.";
-    if (percentage < 100) return "Almost there, Champion! Finish strong and claim your mastery!";
+    if (percentage == 0)
+      return "Big journey ahead! Let's start with one video today.";
+    if (percentage < 20)
+      return "Great start! Every small step counts on your learning path.";
+    if (percentage < 50)
+      return "Keep going! You're making steady progress through your courses.";
+    if (percentage < 80)
+      return "You're a star! Just a few more lessons left to completion.";
+    if (percentage < 100)
+      return "Almost there, Champion! Finish strong and claim your mastery!";
     return "Yeah Champion! You have completed everything! You are elite!";
   }
 
@@ -21,7 +26,10 @@ class ProgressDashboard extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.purple.shade50,
       appBar: AppBar(
-        title: const Text("Learning Journey", style: TextStyle(fontFamily: "Poppins", fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Learning Journey",
+          style: TextStyle(fontFamily: "Poppins", fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -32,7 +40,9 @@ class ProgressDashboard extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          final stats = snapshot.data ?? {'total': 0, 'completed': 0, 'percentage': 0.0, 'classCount': 0};
+          final stats =
+              snapshot.data ??
+              {'total': 0, 'completed': 0, 'percentage': 0.0, 'classCount': 0};
           final percentage = (stats['percentage'] as num).toDouble();
           final completed = stats['completed'] as int;
           final total = stats['total'] as int;
@@ -53,7 +63,11 @@ class ProgressDashboard extends StatelessWidget {
                     ),
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
-                      BoxShadow(color: Colors.purple.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))
+                      BoxShadow(
+                        color: Colors.purple.withValues(alpha: 0.3),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
                     ],
                   ),
                   child: Column(
@@ -67,7 +81,9 @@ class ProgressDashboard extends StatelessWidget {
                             child: CircularProgressIndicator(
                               value: (percentage / 100).clamp(0.0, 1.0),
                               strokeWidth: 12,
-                              backgroundColor: Colors.white.withOpacity(0.2),
+                              backgroundColor: Colors.white.withValues(
+                                alpha: 0.2,
+                              ),
                               color: Colors.white,
                               strokeCap: StrokeCap.round,
                             ),
@@ -76,11 +92,19 @@ class ProgressDashboard extends StatelessWidget {
                             children: [
                               Text(
                                 "${percentage.toStringAsFixed(0)}%",
-                                style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold, fontFamily: "Poppins"),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: "Poppins",
+                                ),
                               ),
                               const Text(
                                 "Overall",
-                                style: TextStyle(color: Colors.white70, fontSize: 14),
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                ),
                               ),
                             ],
                           ),
@@ -90,13 +114,18 @@ class ProgressDashboard extends StatelessWidget {
                       Text(
                         _getMotivationalText(percentage),
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.white, fontSize: 16, fontFamily: "Sans", fontWeight: FontWeight.w500),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontFamily: "Sans",
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 30),
-                
+
                 // Stats Grid
                 Row(
                   children: [
@@ -130,11 +159,15 @@ class ProgressDashboard extends StatelessWidget {
                   percentage >= 100 ? Colors.green : Colors.amber,
                   fullWidth: true,
                 ),
-                
+
                 const SizedBox(height: 40),
                 const Text(
                   "Every minute of learning makes you smarter! 🧠",
-                  style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic, fontSize: 14),
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
+                    fontSize: 14,
+                  ),
                 ),
               ],
             ),
@@ -144,7 +177,14 @@ class ProgressDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatTile(BuildContext context, String title, String value, IconData icon, Color color, {bool fullWidth = false}) {
+  Widget _buildStatTile(
+    BuildContext context,
+    String title,
+    String value,
+    IconData icon,
+    Color color, {
+    bool fullWidth = false,
+  }) {
     return Container(
       padding: const EdgeInsets.all(20),
       // width: fullWidth ? double.infinity : null,
@@ -152,20 +192,40 @@ class ProgressDashboard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: fullWidth ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+        crossAxisAlignment: fullWidth
+            ? CrossAxisAlignment.center
+            : CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            backgroundColor: color.withOpacity(0.1),
+            backgroundColor: color.withValues(alpha: 0.1),
             child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(height: 15),
-          Text(title, style: const TextStyle(color: Colors.grey, fontSize: 13, fontFamily: "Sans")),
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.grey,
+              fontSize: 13,
+              fontFamily: "Sans",
+            ),
+          ),
           const SizedBox(height: 5),
-          Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: "Poppins")),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              fontFamily: "Poppins",
+            ),
+          ),
         ],
       ),
     );

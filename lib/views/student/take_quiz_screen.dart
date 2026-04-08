@@ -166,7 +166,7 @@ class _TakeQuizScreenState extends State<TakeQuizScreen> {
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(25),
-                boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 4))],
+                boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.15), blurRadius: 10, offset: const Offset(0, 4))],
               ),
               child: Text(
                 question['question'] ?? '',

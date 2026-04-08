@@ -56,6 +56,7 @@ class Login extends StatelessWidget {
                         fontFamily: "Sans",
                         color: Colors.black54,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 30),
                     OutlinedButton(

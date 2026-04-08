@@ -43,7 +43,7 @@ class DashboardHeader extends StatelessWidget {
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Stack(
@@ -91,7 +91,7 @@ class DashboardHeader extends StatelessWidget {
                     const SizedBox(width: 5),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: IconButton(
@@ -113,7 +113,7 @@ class DashboardHeader extends StatelessWidget {
                       borderSide: BorderSide.none,
                     ),
                     filled: true,
-                    fillColor: Theme.of(context).cardColor.withOpacity(0.9),
+                    fillColor: Theme.of(context).cardColor.withValues(alpha: 0.9),
                     hintText: "Search Courses",
                     hintStyle: const TextStyle(fontFamily: "Poppins"),
                     prefixIcon: const Icon(Icons.search),
@@ -129,14 +129,14 @@ class DashboardHeader extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Your Solution, One", style: TextStyle(fontSize: 20, fontFamily: "Poppins", color: Colors.white)),
-                          const Text("Tap Away!", style: TextStyle(fontSize: 20, fontFamily: "Poppins", color: Colors.white)),
-                          const Text("Seamless, Fast and Reliable", style: TextStyle(fontSize: 12, fontFamily: "Sans", color: Colors.white70)),
-                          const Text("Services at your Fingertips", style: TextStyle(fontSize: 12, fontFamily: "Sans", color: Colors.white70)),
+                          const Text("Learn. Build. Shine 🚀", style: TextStyle(fontSize: 20, fontFamily: "Poppins", color: Colors.white)),
+                          const Text("Turn your ideas into", style: TextStyle(fontSize: 20, fontFamily: "Poppins", color: Colors.white)),
+                          const Text("real-world skills with fun,", style: TextStyle(fontSize: 12, fontFamily: "Sans", color: Colors.white70)),
+                          const Text("hands-on learning", style: TextStyle(fontSize: 12, fontFamily: "Sans", color: Colors.white70)),
                           const SizedBox(height: 7),
                           OutlinedButton(
                             style: OutlinedButton.styleFrom(
-                              backgroundColor: Colors.white.withOpacity(0.2),
+                              backgroundColor: Colors.white.withValues(alpha: 0.2),
                               side: const BorderSide(color: Colors.white, width: 1),
                               shape: const StadiumBorder(),
                             ),
