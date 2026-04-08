@@ -172,7 +172,7 @@ class _WidgetTreeState extends State<WidgetTree> {
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatbotScreen()));
         },
-        backgroundColor: Colors.orangeAccent,
+        backgroundColor: Colors.purple,
         icon: const Icon(Icons.smart_toy, color: Colors.white),
         label: const Text("AI Buddy", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       );
@@ -190,7 +190,12 @@ class _WidgetTreeState extends State<WidgetTree> {
         leading: const Icon(Icons.logout),
         splashColor: Colors.purple.shade100,
         onTap: () async {
-          await AuthService().logout();
+          Navigator.of(context).pop(); // Close drawer
+          try {
+            await AuthService().logout();
+          } catch (e) {
+            debugPrint("Logout error: $e");
+          }
           if (mounted) {
             Navigator.pushAndRemoveUntil(
               context, 

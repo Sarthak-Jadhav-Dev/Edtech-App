@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:kte/views/parent/notification_center.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DashboardHeader extends StatelessWidget {
   final Map<String, dynamic> userData;
   final String greetingPrefix;
+  final Function(String)? onSearchChanged;
 
-  const DashboardHeader({super.key, required this.userData, this.greetingPrefix = "Welcome"});
+  const DashboardHeader({super.key, required this.userData, this.greetingPrefix = "Welcome", this.onSearchChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +17,7 @@ class DashboardHeader extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Container(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.4),
+          color: Theme.of(context).colorScheme.primary,
           child: Column(
             children: [
               Padding(
@@ -42,9 +46,46 @@ class DashboardHeader extends StatelessWidget {
                         color: Colors.white.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.notifications, color: Colors.white),
+                      child: Stack(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              if (userData['userType'] == 'Parent') {
+                                Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationCenter()));
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Notifications feature coming soon for your account!")));
+                              }
+                            },
+                            icon: const Icon(Icons.notifications, color: Colors.white),
+                          ),
+                          if (userData['userType'] == 'Parent')
+                            Positioned(
+                              right: 8,
+                              top: 8,
+                              child: StreamBuilder<QuerySnapshot>(
+                                stream: FirebaseFirestore.instance
+                                    .collection('notifications')
+                                    .where('recipientId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+                                    .where('isRead', isEqualTo: false)
+                                    .snapshots(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+                                    return Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                                      constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                                      child: Text(
+                                        '${snapshot.data!.docs.length}',
+                                        style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    );
+                                  }
+                                  return const SizedBox.shrink();
+                                },
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                     const SizedBox(width: 5),
@@ -65,6 +106,7 @@ class DashboardHeader extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: TextField(
                   autofocus: false,
+                  onChanged: onSearchChanged,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -117,9 +159,8 @@ class DashboardHeader extends StatelessWidget {
 
 class SectionHeader extends StatelessWidget {
   final String title;
-  final VoidCallback onSeeAll;
 
-  const SectionHeader({super.key, required this.title, required this.onSeeAll});
+  const SectionHeader({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -129,10 +170,6 @@ class SectionHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(title, style: const TextStyle(fontSize: 18, fontFamily: "Poppins", fontWeight: FontWeight.bold)),
-          TextButton(
-            onPressed: onSeeAll,
-            child: const Text("View all>", style: TextStyle(color: Colors.blue)),
-          ),
         ],
       ),
     );

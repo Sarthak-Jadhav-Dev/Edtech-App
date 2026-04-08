@@ -122,11 +122,11 @@ class _LinkParentScreenState extends State<LinkParentScreen>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1040),
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("Remove Parent?", style: TextStyle(color: Colors.white, fontFamily: "Poppins")),
+        title: const Text("Remove Parent?", style: TextStyle(color: Colors.black, fontFamily: "Poppins", fontWeight: FontWeight.bold)),
         content: const Text("Are you sure you want to unlink this parent?",
-            style: TextStyle(color: Colors.white70, fontFamily: "Sans")),
+            style: TextStyle(color: Colors.black87, fontFamily: "Sans")),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -175,7 +175,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
     final bool maxReached = _linkedParents.length >= _maxParents;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0825),
+      backgroundColor: Colors.purple.shade50,
       body: CustomScrollView(
         slivers: [
           _buildSliverAppBar(),
@@ -215,7 +215,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
       expandedHeight: 130,
       pinned: true,
       stretch: true,
-      backgroundColor: const Color(0xFF1A0D47),
+      backgroundColor: Colors.deepPurple.shade400,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
         onPressed: () => Navigator.pop(context),
@@ -232,9 +232,9 @@ class _LinkParentScreenState extends State<LinkParentScreen>
           ),
         ),
         background: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF6C3FC8), Color(0xFF1A0D47)],
+              colors: [Colors.purple.shade900, Colors.deepPurple.shade400],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -244,7 +244,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
             child: Padding(
               padding: const EdgeInsets.only(right: 20),
               child: Icon(Icons.family_restroom_rounded,
-                  size: 64, color: Colors.white.withOpacity(0.12)),
+                  size: 64, color: Colors.white.withOpacity(0.2)),
             ),
           ),
         ),
@@ -371,15 +371,16 @@ class _LinkParentScreenState extends State<LinkParentScreen>
             errorBuilder: (ctx, err, _) => Icon(
               Icons.family_restroom_outlined,
               size: 100,
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.grey.withOpacity(0.3),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             "No parents linked yet",
             style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.black54,
               fontFamily: "Poppins",
+              fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
           ),
@@ -387,7 +388,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
           Text(
             "Search by email below to connect a parent.",
             style: TextStyle(
-              color: Colors.white.withOpacity(0.3),
+              color: Colors.grey.shade600,
               fontFamily: "Sans",
               fontSize: 13,
             ),
@@ -414,13 +415,12 @@ class _LinkParentScreenState extends State<LinkParentScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1040),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.purpleAccent.withOpacity(0.2)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 12,
+            color: Colors.grey.withOpacity(0.15),
+            blurRadius: 8,
             offset: const Offset(0, 4),
           )
         ],
@@ -453,7 +453,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
         title: Text(
           name.isEmpty ? "Parent" : name,
           style: const TextStyle(
-            color: Colors.white,
+            color: Colors.black87,
             fontFamily: "Poppins",
             fontWeight: FontWeight.w600,
             fontSize: 15,
@@ -463,13 +463,13 @@ class _LinkParentScreenState extends State<LinkParentScreen>
           padding: const EdgeInsets.only(top: 2),
           child: Row(
             children: [
-              const Icon(Icons.email_outlined, size: 12, color: Colors.white38),
+              const Icon(Icons.email_outlined, size: 12, color: Colors.grey),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   email,
                   style: const TextStyle(
-                    color: Colors.white54,
+                    color: Colors.black54,
                     fontFamily: "Sans",
                     fontSize: 12,
                   ),
@@ -521,9 +521,10 @@ class _LinkParentScreenState extends State<LinkParentScreen>
     return Text(
       label,
       style: const TextStyle(
-        color: Colors.white70,
+        color: Colors.black87,
         fontFamily: "Poppins",
-        fontSize: 14,
+        fontWeight: FontWeight.bold,
+        fontSize: 16,
         letterSpacing: 0.5,
       ),
     );
@@ -532,19 +533,25 @@ class _LinkParentScreenState extends State<LinkParentScreen>
   Widget _buildSearchBar() {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1040),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.purpleAccent.withOpacity(0.25)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          )
+        ],
       ),
       child: Row(
         children: [
           Expanded(
             child: TextField(
               controller: _emailController,
-              style: const TextStyle(color: Colors.white, fontFamily: "Sans"),
+              style: const TextStyle(color: Colors.black87, fontFamily: "Sans"),
               decoration: InputDecoration(
                 hintText: "Enter parent's email address…",
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontFamily: "Sans"),
+                hintStyle: TextStyle(color: Colors.grey.shade400, fontFamily: "Sans"),
                 prefixIcon: const Icon(Icons.email_outlined, color: Colors.purple, size: 20),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
@@ -620,11 +627,10 @@ class _LinkParentScreenState extends State<LinkParentScreen>
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1E1040),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.purpleAccent.withOpacity(0.35)),
         boxShadow: [
-          BoxShadow(color: const Color(0xFF6C3FC8).withOpacity(0.25), blurRadius: 16, offset: const Offset(0, 6))
+          BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 12, offset: const Offset(0, 6))
         ],
       ),
       child: Padding(
@@ -662,7 +668,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
                       Text(
                         name.isEmpty ? "Parent Account" : name,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Colors.black87,
                           fontFamily: "Poppins",
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -672,7 +678,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
                       Text(
                         email,
                         style: const TextStyle(
-                            color: Colors.white54, fontFamily: "Sans", fontSize: 12),
+                            color: Colors.black54, fontFamily: "Sans", fontSize: 12),
                       ),
                     ],
                   ),
@@ -747,9 +753,9 @@ class _LinkParentScreenState extends State<LinkParentScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.amber.withOpacity(0.08),
+        color: Colors.amber.shade50,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.amber.withOpacity(0.3)),
+        border: Border.all(color: Colors.amber.shade300),
       ),
       child: Row(
         children: [
@@ -772,7 +778,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
                 Text(
                   "You can link up to 2 parent accounts. Remove one above to add another.",
                   style: TextStyle(
-                    color: Colors.white54,
+                    color: Colors.black54,
                     fontFamily: "Sans",
                     fontSize: 12,
                   ),

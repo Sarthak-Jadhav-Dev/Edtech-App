@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kte/services/auth_services.dart';
 import 'package:kte/services/theme_notifier.dart';
+import 'package:kte/views/common/settings_page.dart';
 import '../login.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -11,7 +12,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  Widget buildTile(IconData icon, String title) {
+  Widget buildTile(IconData icon, String title, VoidCallback onTap) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Container(
@@ -23,10 +24,10 @@ class _ProfilePageState extends State<ProfilePage> {
           leading: Icon(icon, color: Colors.black87),
           title: Text(
             title,
-            style: TextStyle(fontFamily: "Poppins"),
+            style: const TextStyle(fontFamily: "Poppins"),
           ),
-          trailing: Icon(Icons.arrow_forward_ios, size: 16),
-          onTap: () {},
+          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          onTap: onTap,
         ),
       ),
     );
@@ -134,10 +135,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   }
                 ),
 
-                const SizedBox(height: 10),
-
-                buildTile(Icons.security, "Application Security"),
-                buildTile(Icons.lock, "Change Password"),
+                buildTile(Icons.settings, "Settings & Security", () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage()));
+                }),
+                buildTile(Icons.info_outline, "Help & Support", () {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Support team: support@kidsedutech.com")));
+                }),
                 const SizedBox(height: 20),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),

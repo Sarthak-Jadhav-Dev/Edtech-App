@@ -97,7 +97,6 @@ class ChildQuizInsights extends StatelessWidget {
 
   Widget _buildInsightsView(Map<String, dynamic> insights) {
     final parentRemarks = insights['parentRemarks'] ?? "No remark available.";
-    final coveredTopics = List<String>.from(insights['coveredTopics'] ?? []);
     final understoodTopics = List<String>.from(insights['understoodTopics'] ?? []);
     final focusTopics = List<String>.from(insights['focusTopics'] ?? []);
 

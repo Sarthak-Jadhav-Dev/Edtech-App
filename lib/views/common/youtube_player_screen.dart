@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:kte/services/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class YouTubePlayerScreen extends StatefulWidget {
   final String videoId;
@@ -21,7 +20,6 @@ class YouTubePlayerScreen extends StatefulWidget {
 
 class _YouTubePlayerScreenState extends State<YouTubePlayerScreen> {
   late YoutubePlayerController _controller;
-  bool _isReady = false;
   Timer? _progressTimer;
   double _lastSavedPercentage = 0;
 
@@ -33,7 +31,6 @@ class _YouTubePlayerScreenState extends State<YouTubePlayerScreen> {
 
   Future<void> _initController() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    int startAtSeconds = 0;
 
     if (uid != null) {
       // Fetch existing progress
@@ -60,9 +57,6 @@ class _YouTubePlayerScreenState extends State<YouTubePlayerScreen> {
       ),
     )..addListener(_listener);
 
-    setState(() {
-      _isReady = true;
-    });
 
     // Start periodic tracking
     _progressTimer = Timer.periodic(const Duration(seconds: 10), (timer) {

@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../services/auth_services.dart';
 import '../../../services/firestore_service.dart';
 import '../../student/class_detail_screen.dart';
+import '../../student/assignment_view_screen.dart';
+import '../../student/progress_dashboard.dart';
 import 'shared_components.dart';
 
 class HomeSection extends StatefulWidget {
@@ -15,6 +17,14 @@ class HomeSection extends StatefulWidget {
 
 class _HomeSectionState extends State<HomeSection> {
   final String uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+  String searchQuery = "";
+  late final Future<DocumentSnapshot> _userDataFuture = AuthService().getUserData();
+  late final Stream<QuerySnapshot> _classesStream = FirestoreService().getEnrolledClasses(uid, 'Student');
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   Widget _buildClassCard(Map<String, dynamic> classData, String classId, BuildContext context) {
     return Container(
@@ -73,7 +83,13 @@ class _HomeSectionState extends State<HomeSection> {
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
           onTap: () {
-            // Can route to assignment details later
+            Navigator.push(context, MaterialPageRoute(
+              builder: (_) => AssignmentViewScreen(
+                classId: assignment['classId'],
+                contentId: assignment['id'],
+                assignmentData: assignment,
+              )
+            ));
           },
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -107,7 +123,7 @@ class _HomeSectionState extends State<HomeSection> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: AuthService().getUserData(),
+      future: _userDataFuture,
       builder: (context, asyncSnapshot) {
         if (asyncSnapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -120,21 +136,35 @@ class _HomeSectionState extends State<HomeSection> {
         return SingleChildScrollView(
           child: Column(
             children: [
-              DashboardHeader(userData: userData, greetingPrefix: "Welcome back"),
+              DashboardHeader(
+                userData: userData, 
+                greetingPrefix: "Welcome back",
+                onSearchChanged: (val) {
+                  setState(() {
+                    searchQuery = val.trim().toLowerCase();
+                  });
+                },
+              ),
               
               StreamBuilder<QuerySnapshot>(
-                stream: FirestoreService().getEnrolledClasses(uid, 'Student'),
+                stream: _classesStream,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                      return const Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator());
                   }
                   
-                  final classes = snapshot.data?.docs ?? [];
+                  final allClasses = snapshot.data?.docs ?? [];
+                  final classes = allClasses.where((doc) {
+                    if (searchQuery.isEmpty) return true;
+                    final data = doc.data() as Map<String, dynamic>;
+                    final name = (data['name'] ?? '').toString().toLowerCase();
+                    return name.contains(searchQuery);
+                  }).toList();
                   final classIds = classes.map((d) => d.id).toList();
 
                   return Column(
                     children: [
-                      SectionHeader(title: "Your Courses", onSeeAll: () {}),
+                      SectionHeader(title: "Your Courses"),
                       if (classes.isEmpty)
                         const Padding(
                           padding: EdgeInsets.all(20.0),
@@ -154,7 +184,7 @@ class _HomeSectionState extends State<HomeSection> {
                           ),
                         ),
 
-                      SectionHeader(title: "Pending Assignments", onSeeAll: () {}),
+                      SectionHeader(title: "Pending Assignments"),
                       if (classes.isEmpty)
                         const Padding(
                           padding: EdgeInsets.all(20.0),
@@ -162,7 +192,7 @@ class _HomeSectionState extends State<HomeSection> {
                         )
                       else
                         FutureBuilder<List<Map<String, dynamic>>>(
-                          future: FirestoreService().getPendingAssignments(classIds),
+                          future: FirestoreService().getPendingAssignments(uid, classIds),
                           builder: (context, assignSnapshot) {
                             if (assignSnapshot.connectionState == ConnectionState.waiting) {
                               return const CircularProgressIndicator();
@@ -192,14 +222,18 @@ class _HomeSectionState extends State<HomeSection> {
                 }
               ),
 
-              SectionHeader(title: "Quick Links", onSeeAll: () {}),
+              SectionHeader(title: "Quick Links"),
               Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildQuickLinkButton(context, "Live Classes"),
-                    _buildQuickLinkButton(context, "Progress"),
+                    _buildQuickLinkButton(context, "Live Classes", () {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Coming Soon! Live sessions integration is in progress.")));
+                    }),
+                    _buildQuickLinkButton(context, "Progress", () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const ProgressDashboard()));
+                    }),
                   ],
                 ),
               ),
@@ -211,18 +245,22 @@ class _HomeSectionState extends State<HomeSection> {
     );
   }
 
-  Widget _buildQuickLinkButton(BuildContext context, String text) {
-    return Container(
-      width: 150,
-      height: 60,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: const TextStyle(fontFamily: "Sans", fontWeight: FontWeight.bold),
+  Widget _buildQuickLinkButton(BuildContext context, String text, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20.0),
+      child: Container(
+        width: 150,
+        height: 60,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: const TextStyle(fontFamily: "Sans", fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );

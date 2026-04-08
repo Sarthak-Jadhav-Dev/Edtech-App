@@ -68,6 +68,7 @@ class _TakeQuizScreenState extends State<TakeQuizScreen> {
       answers: _selectedAnswers,
       questions: questions,
       timeTakenSeconds: timeTakenSeconds,
+      title: widget.title,
     );
 
     if (result != null && mounted) {

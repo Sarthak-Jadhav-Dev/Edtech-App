@@ -2,13 +2,13 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 
 class AiService {
   // TODO: Replace with your actual Gemini API key or use flutter_dotenv
-  static const String _apiKey = 'YOUR_GEMINI_API_KEY_HERE';
+  static const String _apiKey = 'AIzaSyAgAPcL2ITodk_UnfL4-ezpAi1mYURBl3o';
   
   static Future<String?> getResponse(String userMessage, List<Content> chatHistory) async {
     try {
       // We use gemini-1.5-flash as it is fast and supports system instructions well
       final model = GenerativeModel(
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.0-flash',
         apiKey: _apiKey,
         systemInstruction: Content.system(
           "You are Buddy, a friendly, enthusiastic, and highly encouraging AI learning buddy for a child aged 6-14. "

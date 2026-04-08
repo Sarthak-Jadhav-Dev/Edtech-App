@@ -4,8 +4,10 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class AddContentScreen extends StatefulWidget {
   final String classId;
+  final String? contentId;
+  final Map<String, dynamic>? initialData;
 
-  const AddContentScreen({super.key, required this.classId});
+  const AddContentScreen({super.key, required this.classId, this.contentId, this.initialData});
 
   @override
   State<AddContentScreen> createState() => _AddContentScreenState();
@@ -17,6 +19,17 @@ class _AddContentScreenState extends State<AddContentScreen> {
   final _urlController = TextEditingController();
   String _selectedType = 'video';
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialData != null) {
+      _titleController.text = widget.initialData!['title'] ?? '';
+      _descController.text = widget.initialData!['description'] ?? '';
+      _urlController.text = widget.initialData!['url'] ?? '';
+      _selectedType = widget.initialData!['type'] ?? 'video';
+    }
+  }
 
   @override
   void dispose() {
@@ -51,22 +64,35 @@ class _AddContentScreenState extends State<AddContentScreen> {
 
     setState(() => _isLoading = true);
 
-    bool success = await FirestoreService().addContent(
-      classId: widget.classId,
-      title: title,
-      description: _descController.text.trim().isNotEmpty ? _descController.text.trim() : null,
-      type: _selectedType,
-      url: url,
-      videoId: videoId,
-    );
+    bool success;
+    if (widget.contentId != null) {
+      success = await FirestoreService().updateContent(
+        classId: widget.classId,
+        contentId: widget.contentId!,
+        title: title,
+        description: _descController.text.trim().isNotEmpty ? _descController.text.trim() : null,
+        type: _selectedType,
+        url: url,
+        videoId: videoId,
+      );
+    } else {
+      success = await FirestoreService().addContent(
+        classId: widget.classId,
+        title: title,
+        description: _descController.text.trim().isNotEmpty ? _descController.text.trim() : null,
+        type: _selectedType,
+        url: url,
+        videoId: videoId,
+      );
+    }
 
     setState(() => _isLoading = false);
 
     if (success && mounted) {
-      _showSnack('Content added successfully!');
+      _showSnack(widget.contentId != null ? 'Content updated successfully!' : 'Content added successfully!');
       Navigator.pop(context);
     } else if (mounted) {
-      _showSnack('Failed to add content.');
+      _showSnack('Failed to process content.');
     }
   }
 
@@ -79,7 +105,7 @@ class _AddContentScreenState extends State<AddContentScreen> {
     return Scaffold(
       backgroundColor: Colors.purple.shade50,
       appBar: AppBar(
-        title: const Text("Add Learning Material", style: TextStyle(fontFamily: "Poppins", color: Colors.black)),
+        title: Text(widget.contentId != null ? "Edit Content" : "Add Learning Material", style: const TextStyle(fontFamily: "Poppins", color: Colors.black)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -169,7 +195,7 @@ class _AddContentScreenState extends State<AddContentScreen> {
                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                                elevation: 5,
                              ),
-                             child: const Text("Publish Content", style: TextStyle(color: Colors.white, fontFamily: "Poppins", fontSize: 18)),
+                             child: Text(widget.contentId != null ? "Save Changes" : "Publish Content", style: const TextStyle(color: Colors.white, fontFamily: "Poppins", fontSize: 18)),
                            ),
                    ],
                  ),

@@ -14,8 +14,6 @@ class Login extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 30),
-
-              /// 🔥 TOP IMAGE (same hero for smooth animation)
               Hero(
                 tag: 'Hello',
                 child: Padding(
@@ -32,8 +30,6 @@ class Login extends StatelessWidget {
               ),
 
               const SizedBox(height: 10),
-
-              /// 🔥 MAIN CARD
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -45,7 +41,6 @@ class Login extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    /// TITLE
                     const Text(
                       "Welcome to KTE",
                       style: TextStyle(
@@ -54,20 +49,15 @@ class Login extends StatelessWidget {
                         fontFamily: "Poppins",
                       ),
                     ),
-
                     const SizedBox(height: 8),
-
                     const Text(
-                      "Start your journey with us",
+                      "Empowering young minds to explore, create, and innovate through hands-on learning experiences.",
                       style: TextStyle(
                         fontFamily: "Sans",
                         color: Colors.black54,
                       ),
                     ),
-
                     const SizedBox(height: 30),
-
-                    /// LOGIN BUTTON
                     OutlinedButton(
                       onPressed: () {
                         Navigator.push(
@@ -92,8 +82,6 @@ class Login extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 15),
-
-                    /// REGISTER BUTTON
                     OutlinedButton(
                       onPressed: () {
                         Navigator.push(
@@ -120,10 +108,8 @@ class Login extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 25),
-
-                    /// FOOTER TEXT
                     const Text(
-                      "By continuing, you agree to our Terms & Privacy Policy",
+                      "By continuing, you confirm that you have read and agree to KTE’s Terms of Service and Privacy Policy, and consent to the collection and use of your information in accordance with these policies.",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontFamily: "Sans",

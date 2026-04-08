@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:lottie/lottie.dart';
 import '../../../../models/chat_message_model.dart';
 import '../../../../services/ai_service.dart';
 import '../../../../services/chat_firestore_service.dart';
@@ -79,23 +78,23 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue.shade50,
+      backgroundColor: Colors.purple.shade50,
       appBar: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Safe fallback icon if lottie network fails
-            const Icon(Icons.smart_toy, color: Colors.orangeAccent),
+            const Icon(Icons.smart_toy, color: Colors.purple),
             const SizedBox(width: 10),
             const Text(
               "AI Buddy",
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.purple),
             ),
           ],
         ),
         backgroundColor: Colors.white,
         elevation: 1,
-        iconTheme: const IconThemeData(color: Colors.indigo),
+        iconTheme: const IconThemeData(color: Colors.purple),
       ),
       body: Stack(
         children: [
@@ -113,7 +112,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.waving_hand, size: 64, color: Colors.orange.shade300)
+                            Icon(Icons.waving_hand, size: 64, color: Colors.purple.shade300)
                                 .animate(onPlay: (controller) => controller.repeat())
                                 .shakeY(duration: 2.seconds),
                             const SizedBox(height: 16),
@@ -143,7 +142,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
                     children: [
-                      const Icon(Icons.smart_toy, color: Colors.orange),
+                      const Icon(Icons.smart_toy, color: Colors.purple),
                       const SizedBox(width: 10),
                       const Text("Buddy is typing...", style: TextStyle(color: Colors.black54, fontStyle: FontStyle.italic))
                           .animate(onPlay: (controller) => controller.repeat())
@@ -218,9 +217,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             const SizedBox(width: 8),
             Container(
               decoration: BoxDecoration(
-                color: Colors.orangeAccent,
+                color: Colors.purple,
                 shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: Colors.orange.withOpacity(0.4), blurRadius: 8, offset: const Offset(0,4))],
+                boxShadow: [BoxShadow(color: Colors.purple.withOpacity(0.4), blurRadius: 8, offset: const Offset(0,4))],
               ),
               child: IconButton(
                 icon: const Icon(Icons.send_rounded, color: Colors.white),

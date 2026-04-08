@@ -7,8 +7,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../services/auth_services.dart';
 import '../pages/home_section/shared_components.dart';
 
-class TeacherDashboard extends StatelessWidget {
+class TeacherDashboard extends StatefulWidget {
   const TeacherDashboard({super.key});
+
+  @override
+  State<TeacherDashboard> createState() => _TeacherDashboardState();
+}
+
+class _TeacherDashboardState extends State<TeacherDashboard> {
+  String searchQuery = "";
+  late final Future<DocumentSnapshot> _userDataFuture = AuthService().getUserData();
+  late final Stream<QuerySnapshot> _classesStream = FirestoreService().getTeacherClasses(FirebaseAuth.instance.currentUser?.uid ?? '');
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   Widget _buildTeacherClassCard(Map<String, dynamic> classData, String classId, BuildContext context) {
     return Container(
@@ -94,8 +108,6 @@ class TeacherDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
-
     return Scaffold(
       backgroundColor: Colors.transparent,
       floatingActionButton: FloatingActionButton.extended(
@@ -110,7 +122,7 @@ class TeacherDashboard extends StatelessWidget {
         label: const Text("Create Class", style: TextStyle(color: Colors.white, fontFamily: "Sans")),
       ),
       body: FutureBuilder(
-        future: AuthService().getUserData(),
+        future: _userDataFuture,
         builder: (context, asyncSnapshot) {
           if (asyncSnapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -124,10 +136,18 @@ class TeacherDashboard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                DashboardHeader(userData: userData, greetingPrefix: "Welcome Educator"),
+                DashboardHeader(
+                  userData: userData, 
+                  greetingPrefix: "Welcome Educator",
+                  onSearchChanged: (val) {
+                    setState(() {
+                      searchQuery = val.trim().toLowerCase();
+                    });
+                  },
+                ),
                 
                 StreamBuilder<QuerySnapshot>(
-                  stream: FirestoreService().getTeacherClasses(uid),
+                  stream: _classesStream,
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
                       return Center(
@@ -141,7 +161,13 @@ class TeacherDashboard extends StatelessWidget {
                       return const Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator());
                     }
                     
-                    final classes = snapshot.data?.docs.toList() ?? [];
+                    final allClasses = snapshot.data?.docs.toList() ?? [];
+                    final classes = allClasses.where((doc) {
+                      if (searchQuery.isEmpty) return true;
+                      final data = doc.data() as Map<String, dynamic>;
+                      final name = (data['name'] ?? '').toString().toLowerCase();
+                      return name.contains(searchQuery);
+                    }).toList();
                     classes.sort((a, b) {
                       final aData = a.data() as Map<String, dynamic>;
                       final bData = b.data() as Map<String, dynamic>;
@@ -155,7 +181,7 @@ class TeacherDashboard extends StatelessWidget {
 
                     return Column(
                       children: [
-                        SectionHeader(title: "Classes You Teach", onSeeAll: () {}),
+                        SectionHeader(title: "Classes You Teach"),
                         if (classes.isEmpty)
                           const Padding(
                             padding: EdgeInsets.all(20.0),
@@ -177,7 +203,7 @@ class TeacherDashboard extends StatelessWidget {
                             ),
                           ),
 
-                        SectionHeader(title: "Assignments Given", onSeeAll: () {}),
+                        SectionHeader(title: "Assignments Given"),
                         if (classes.isEmpty)
                           const Padding(
                             padding: EdgeInsets.all(20.0),
@@ -185,7 +211,7 @@ class TeacherDashboard extends StatelessWidget {
                           )
                         else
                           FutureBuilder<List<Map<String, dynamic>>>(
-                            future: FirestoreService().getPendingAssignments(classIds),
+                            future: FirestoreService().getTeacherAssignments(classIds),
                             builder: (context, assignSnapshot) {
                               if (assignSnapshot.connectionState == ConnectionState.waiting) {
                                 return const CircularProgressIndicator();

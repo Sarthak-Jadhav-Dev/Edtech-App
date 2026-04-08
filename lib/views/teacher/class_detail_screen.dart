@@ -222,6 +222,18 @@ class ClassDetailScreen extends StatelessWidget {
                                 },
                               ),
                               IconButton(
+                                icon: const Icon(Icons.edit, color: Colors.purple),
+                                onPressed: () {
+                                  Navigator.push(context, MaterialPageRoute(
+                                    builder: (_) => AddContentScreen(
+                                      classId: classId,
+                                      contentId: contents[index].id,
+                                      initialData: contentData,
+                                    )
+                                  ));
+                                },
+                              ),
+                              IconButton(
                                 icon: const Icon(Icons.delete, color: Colors.red),
                                 onPressed: () async {
                                   bool confirm = await showDialog(

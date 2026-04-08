@@ -166,11 +166,42 @@ class AuthService {
   // ─── Sign Out ─────────────────────────────────────────────────────────────
 
   Future<void> logout() async {
-    await _googleSignIn.signOut(); // also clears Google session
+    try {
+      await _googleSignIn.signOut(); // also clears Google session
+    } catch (e) {
+      debugPrint("Google Sign Out Error (Can be ignored if dummy account): $e");
+    }
     await _auth.signOut();
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      debugPrint("Error sending reset email: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> updateDisplayName(String name) async {
+    try {
+      await _auth.currentUser?.updateDisplayName(name);
+    } catch (e) {
+      debugPrint("Error updating display name: $e");
+    }
+  }
+
+  Future<void> deleteAccount() async {
+    try {
+      // Note: Re-authentication might be required by Firebase for this action in production
+      await _auth.currentUser?.delete();
+    } catch (e) {
+      debugPrint("Error deleting account: $e");
+      rethrow;
+    }
+  }
 
   Future<DocumentSnapshot> getUserData() async {
     final uid = _auth.currentUser!.uid;

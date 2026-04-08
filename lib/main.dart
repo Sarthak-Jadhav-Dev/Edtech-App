@@ -34,7 +34,7 @@ class _MyAppState extends State<MyApp> {
           theme: ThemeData(
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.purpleAccent,
+              seedColor: Colors.purple,
               brightness: Brightness.light,
             ),
           ),
@@ -44,7 +44,7 @@ class _MyAppState extends State<MyApp> {
               seedColor: Colors.purpleAccent,
               brightness: Brightness.dark,
             ),
-            scaffoldBackgroundColor: const Color(0xFF121212),
+            scaffoldBackgroundColor: Colors.purpleAccent,
           ),
           home: FutureBuilder(
             future: AppState.isFirstTime(), 

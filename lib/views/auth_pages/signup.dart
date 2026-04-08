@@ -523,7 +523,6 @@ class _OTPBottomSheetContent extends StatefulWidget {
   final String parentEmail;
 
   const _OTPBottomSheetContent({
-    super.key,
     required this.verificationId,
     required this.phone,
     required this.password,

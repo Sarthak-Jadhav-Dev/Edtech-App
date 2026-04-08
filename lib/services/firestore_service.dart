@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:kte/services/gamification_event_bus.dart';
 import 'package:kte/services/ai_quiz_evaluator.dart';
+import 'package:kte/services/notification_service.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -95,6 +95,31 @@ class FirestoreService {
       return true;
     } catch (e) {
       debugPrint("Error adding content: $e");
+      return false;
+    }
+  }
+
+  Future<bool> updateContent({
+    required String classId,
+    required String contentId,
+    required String title,
+    required String type,
+    required String url,
+    String? description,
+    String? videoId,
+  }) async {
+    try {
+      await _db.collection('classes').doc(classId).collection('content').doc(contentId).update({
+        'title': title,
+        'type': type,
+        'url': url,
+        if (videoId != null) 'videoId': videoId,
+        if (description != null) 'description': description,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      return true;
+    } catch (e) {
+      debugPrint("Error updating content: $e");
       return false;
     }
   }
@@ -202,7 +227,45 @@ class FirestoreService {
     return children;
   }
 
-  Future<List<Map<String, dynamic>>> getPendingAssignments(List<String> classIds) async {
+  Future<List<Map<String, dynamic>>> getPendingAssignments(String studentId, List<String> classIds) async {
+    List<Map<String, dynamic>> allAssignments = [];
+    if (classIds.isEmpty) return allAssignments;
+
+    try {
+      // Fetch submitted assignment IDs to filter them out
+      final submissionsQs = await _db.collection('users').doc(studentId).collection('submissions').get();
+      final submittedIds = submissionsQs.docs.map((d) => d.id).toSet();
+
+      for (String classId in classIds) {
+        final qs = await _db.collection('classes').doc(classId).collection('content')
+            .where('type', isEqualTo: 'assignment')
+            .orderBy('createdAt', descending: true)
+            .limit(10)
+            .get();
+            
+        for (var doc in qs.docs) {
+          if (submittedIds.contains(doc.id)) continue;
+          
+          var data = doc.data();
+          data['id'] = doc.id;
+          data['classId'] = classId;
+          allAssignments.add(data);
+        }
+      }
+      
+      allAssignments.sort((a, b) {
+        final aTime = a['createdAt'] as Timestamp?;
+        final bTime = b['createdAt'] as Timestamp?;
+        if (aTime == null || bTime == null) return 0;
+        return bTime.compareTo(aTime);
+      });
+    } catch (e) {
+      debugPrint("Error fetching assignments: $e");
+    }
+    return allAssignments;
+  }
+
+  Future<List<Map<String, dynamic>>> getTeacherAssignments(List<String> classIds) async {
     List<Map<String, dynamic>> allAssignments = [];
     if (classIds.isEmpty) return allAssignments;
 
@@ -229,9 +292,38 @@ class FirestoreService {
         return bTime.compareTo(aTime);
       });
     } catch (e) {
-      debugPrint("Error fetching assignments: $e");
+      debugPrint("Error fetching teacher assignments: $e");
     }
     return allAssignments;
+  }
+
+  Future<void> submitAssignment({
+    required String studentId,
+    required String classId,
+    required String contentId,
+  }) async {
+    try {
+      await _db.collection('users').doc(studentId).collection('submissions').doc(contentId).set({
+        'classId': classId,
+        'submittedAt': FieldValue.serverTimestamp(),
+        'status': 'completed',
+      });
+      
+      // Award basic XP for finishing an assignment
+      await awardXP(studentId, 15);
+    } catch (e) {
+      debugPrint("Error submitting assignment: $e");
+    }
+  }
+
+  Future<DocumentSnapshot?> getAssignmentSubmission(String studentId, String contentId) async {
+    try {
+      final doc = await _db.collection('users').doc(studentId).collection('submissions').doc(contentId).get();
+      return doc.exists ? doc : null;
+    } catch (e) {
+      debugPrint("Error fetching submission: $e");
+      return null;
+    }
   }
 
   // --- Student Progress Tracking ---
@@ -283,6 +375,58 @@ class FirestoreService {
     } catch (e) {
       debugPrint("Error fetching leaderboard: $e");
       return [];
+    }
+  }
+
+  Future<Map<String, dynamic>> getOverallProgressStats(String studentId) async {
+    try {
+      // 1. Get all enrolled classes
+      final enrolledClassesQs = await getEnrolledClasses(studentId, 'Student').first;
+      final classDocs = enrolledClassesQs.docs;
+      
+      if (classDocs.isEmpty) return {'total': 0, 'completed': 0, 'percentage': 0.0};
+
+      int totalContent = 0;
+      int completedContent = 0;
+
+      // 2. Get all progress/submissions for filtering
+      final videoProgressQs = await _db.collection('users').doc(studentId).collection('progress').get();
+      final completedVideos = videoProgressQs.docs.where((d) => (d.data())['completed'] == true).map((d) => d.id).toSet();
+      
+      final submissionQs = await _db.collection('users').doc(studentId).collection('submissions').get();
+      final completedAssignments = submissionQs.docs.where((d) => (d.data())['status'] == 'completed').map((d) => d.id).toSet();
+
+      // 3. Loop through classes and their contents
+      for (var classDoc in classDocs) {
+        final contentQs = await _db.collection('classes').doc(classDoc.id).collection('content').get();
+        totalContent += contentQs.docs.length;
+        
+        for (var content in contentQs.docs) {
+          final data = content.data();
+          if (data['type'] == 'video') {
+            final videoId = data['videoId'];
+            if (videoId != null && completedVideos.contains(videoId)) {
+              completedContent++;
+            }
+          } else if (data['type'] == 'assignment') {
+            if (completedAssignments.contains(content.id)) {
+              completedContent++;
+            }
+          }
+        }
+      }
+
+      final percentage = totalContent == 0 ? 0.0 : (completedContent / totalContent) * 100;
+
+      return {
+        'total': totalContent,
+        'completed': completedContent,
+        'percentage': percentage,
+        'classCount': classDocs.length,
+      };
+    } catch (e) {
+      debugPrint("Error fetching overall stats: $e");
+      return {'total': 0, 'completed': 0, 'percentage': 0.0};
     }
   }
 
@@ -370,6 +514,7 @@ class FirestoreService {
     required List<int> answers,
     required List<Map<String, dynamic>> questions,
     required int timeTakenSeconds,
+    required String title,
   }) async {
     try {
       int score = 0;
@@ -411,6 +556,23 @@ class FirestoreService {
       if (isPerfect) xpEarned += 50; // bonus for perfect score
       
       await awardXP(studentId, xpEarned, isPerfect: isPerfect);
+
+      // Notify Parents
+      if (percentage >= 80) {
+        NotificationService().notifyParents(
+          studentId: studentId,
+          title: "Great Quiz Score! 🥳",
+          message: "Scored ${percentage.toStringAsFixed(0)}% in '$title'!",
+          type: NotificationType.quizScored,
+        );
+      } else {
+         NotificationService().notifyParents(
+          studentId: studentId,
+          title: "Quiz Completed ✅",
+          message: "Finished '$title' quiz.",
+          type: NotificationType.quizScored,
+        );
+      }
 
       return {
         'score': score,
@@ -498,14 +660,32 @@ class FirestoreService {
       if (newQuizzes >= 1 && !badgeNames.contains('Quiz Rookie')) {
         newBadges.add({'name': 'Quiz Rookie', 'icon': 'quiz', 'earnedAt': Timestamp.now()});
         GamificationEventBus.emitReward(RewardEvent(type: RewardType.badgeEarned, title: 'Quiz Rookie'));
+        NotificationService().notifyParents(
+          studentId: userId,
+          title: "New Badge! 🏆",
+          message: "Earned the 'Quiz Rookie' badge!",
+          type: NotificationType.badgeEarned,
+        );
       }
       if (newQuizzes >= 5 && !badgeNames.contains('Quiz Pro')) {
         newBadges.add({'name': 'Quiz Pro', 'icon': 'star', 'earnedAt': Timestamp.now()});
         GamificationEventBus.emitReward(RewardEvent(type: RewardType.badgeEarned, title: 'Quiz Pro'));
+        NotificationService().notifyParents(
+          studentId: userId,
+          title: "New Badge! 🏆",
+          message: "Earned the 'Quiz Pro' badge!",
+          type: NotificationType.badgeEarned,
+        );
       }
       if (newPerfect >= 3 && !badgeNames.contains('Perfectionist')) {
         newBadges.add({'name': 'Perfectionist', 'icon': 'trophy', 'earnedAt': Timestamp.now()});
         GamificationEventBus.emitReward(RewardEvent(type: RewardType.badgeEarned, title: 'Perfectionist'));
+        NotificationService().notifyParents(
+          studentId: userId,
+          title: "New Badge! 🏆",
+          message: "Earned the 'Perfectionist' badge!",
+          type: NotificationType.badgeEarned,
+        );
       }
       if (newXP >= 500 && !badgeNames.contains('XP Hunter')) {
         newBadges.add({'name': 'XP Hunter', 'icon': 'bolt', 'earnedAt': Timestamp.now()});
