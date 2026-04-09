@@ -5,7 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 class ChatBubble extends StatelessWidget {
   final ChatMessage message;
 
-  const ChatBubble({Key? key, required this.message}) : super(key: key);
+  const ChatBubble({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class ChatBubble extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 5,
               offset: const Offset(0, 3),
             )

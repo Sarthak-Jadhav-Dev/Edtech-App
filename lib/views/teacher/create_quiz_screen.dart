@@ -115,7 +115,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                 color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(25),
                 boxShadow: [
-                  BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 5))
+                  BoxShadow(color: Colors.grey.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 5))
                 ],
               ),
               padding: const EdgeInsets.all(25),
@@ -127,7 +127,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                       labelText: "Quiz Title",
                       prefixIcon: Icon(Icons.quiz, color: Colors.purple.shade400),
                       filled: true,
-                      fillColor: Colors.purple.shade50.withOpacity(0.5),
+                      fillColor: Colors.purple.shade50.withValues(alpha: 0.5),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                     ),
                   ),
@@ -138,7 +138,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                       labelText: "Description (Optional)",
                       prefixIcon: Icon(Icons.description, color: Colors.purple.shade400),
                       filled: true,
-                      fillColor: Colors.purple.shade50.withOpacity(0.5),
+                      fillColor: Colors.purple.shade50.withValues(alpha: 0.5),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                     ),
                   ),
@@ -200,7 +200,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.grey.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 3))
+          BoxShadow(color: Colors.grey.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 3))
         ],
       ),
       padding: const EdgeInsets.all(20),
@@ -229,7 +229,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
             decoration: InputDecoration(
               hintText: "Enter question...",
               filled: true,
-              fillColor: Colors.purple.shade50.withOpacity(0.5),
+              fillColor: Colors.purple.shade50.withValues(alpha: 0.5),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
             ),
           ),
@@ -239,10 +239,13 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
                 children: [
+                  // ignore: deprecated_member_use
                   Radio<int>(
                     value: optIdx,
+                    // ignore: deprecated_member_use
                     groupValue: q.correctIndex,
                     activeColor: Colors.green,
+                    // ignore: deprecated_member_use
                     onChanged: (val) {
                       setState(() => q.correctIndex = val!);
                     },

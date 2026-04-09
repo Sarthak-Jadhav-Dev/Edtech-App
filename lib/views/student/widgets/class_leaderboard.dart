@@ -5,7 +5,7 @@ import '../../../../services/firestore_service.dart';
 class ClassLeaderboard extends StatelessWidget {
   final String classId;
 
-  const ClassLeaderboard({Key? key, required this.classId}) : super(key: key);
+  const ClassLeaderboard({super.key, required this.classId});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class ClassLeaderboard extends StatelessWidget {
             borderRadius: BorderRadius.circular(25),
             boxShadow: [
               BoxShadow(
-                color: Colors.purple.withOpacity(0.1),
+                color: Colors.purple.withValues(alpha: 0.1),
                 blurRadius: 15,
                 spreadRadius: 2,
                 offset: const Offset(0, 5),
@@ -62,10 +62,10 @@ class ClassLeaderboard extends StatelessWidget {
                 final name = "${student['firstName'] ?? 'Student'} ${student['lastName'] ?? ''}".trim();
 
                 Color badgeColor;
-                if (index == 0) badgeColor = Colors.amber;
-                else if (index == 1) badgeColor = Colors.grey.shade400;
-                else if (index == 2) badgeColor = Colors.brown.shade300;
-                else badgeColor = Colors.blue.shade200;
+                if (index == 0) { badgeColor = Colors.amber; }
+                else if (index == 1) { badgeColor = Colors.grey.shade400; }
+                else if (index == 2) { badgeColor = Colors.brown.shade300; }
+                else { badgeColor = Colors.blue.shade200; }
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),

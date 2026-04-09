@@ -106,7 +106,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
       final success = await _firestoreService.linkParentToStudent(studentId, _foundParent!.id);
       if (mounted) {
         if (success) {
-          _showSnack("Parent linked successfully! 🎉");
+          _showSnack("Parent linked successfully! Ã°Å¸Å½â€°");
           _emailController.clear();
           setState(() => _foundParent = null);
           await _loadLinkedParents();
@@ -244,7 +244,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
             child: Padding(
               padding: const EdgeInsets.only(right: 20),
               child: Icon(Icons.family_restroom_rounded,
-                  size: 64, color: Colors.white.withOpacity(0.2)),
+                  size: 64, color: Colors.white.withValues(alpha: 0.2)),
             ),
           ),
         ),
@@ -265,7 +265,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6C3FC8).withOpacity(0.4),
+            color: const Color(0xFF6C3FC8).withValues(alpha: 0.4),
             blurRadius: 20,
             offset: const Offset(0, 8),
           )
@@ -277,7 +277,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.shield_outlined, color: Colors.white, size: 28),
@@ -339,7 +339,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
                     shape: BoxShape.circle,
                     color: filled ? Colors.greenAccent : Colors.white24,
                     boxShadow: filled
-                        ? [BoxShadow(color: Colors.greenAccent.withOpacity(0.5), blurRadius: 6)]
+                        ? [BoxShadow(color: Colors.greenAccent.withValues(alpha: 0.5), blurRadius: 6)]
                         : null,
                   ),
                 ),
@@ -372,7 +372,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
               errorBuilder: (ctx, err, _) => Icon(
                 Icons.family_restroom_outlined,
                 size: 100,
-                color: Colors.grey.withOpacity(0.3),
+                color: Colors.grey.withValues(alpha: 0.3),
               ),
             ),
             const SizedBox(height: 8),
@@ -421,7 +421,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
+            color: Colors.grey.withValues(alpha: 0.15),
             blurRadius: 8,
             offset: const Offset(0, 4),
           )
@@ -493,9 +493,9 @@ class _LinkParentScreenState extends State<LinkParentScreen>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.greenAccent.withOpacity(0.15),
+            color: Colors.greenAccent.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.greenAccent.withOpacity(0.4)),
+            border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.4)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -539,7 +539,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
+            color: Colors.grey.withValues(alpha: 0.15),
             blurRadius: 8,
             offset: const Offset(0, 4),
           )
@@ -552,7 +552,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
               controller: _emailController,
               style: const TextStyle(color: Colors.black87, fontFamily: "Sans"),
               decoration: InputDecoration(
-                hintText: "Enter parent's email address…",
+                hintText: "Enter parent's email addressÃ¢â‚¬Â¦",
                 hintStyle: TextStyle(color: Colors.grey.shade400, fontFamily: "Sans"),
                 prefixIcon: const Icon(Icons.email_outlined, color: Colors.purple, size: 20),
                 border: InputBorder.none,
@@ -603,9 +603,9 @@ class _LinkParentScreenState extends State<LinkParentScreen>
       margin: const EdgeInsets.only(top: 4),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.12),
+        color: Colors.red.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.red.withOpacity(0.3)),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -632,7 +632,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 12, offset: const Offset(0, 6))
+          BoxShadow(color: Colors.grey.withValues(alpha: 0.2), blurRadius: 12, offset: const Offset(0, 6))
         ],
       ),
       child: Padding(
@@ -688,9 +688,9 @@ class _LinkParentScreenState extends State<LinkParentScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.purpleAccent.withOpacity(0.15),
+                    color: Colors.purpleAccent.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.purpleAccent.withOpacity(0.4)),
+                    border: Border.all(color: Colors.purpleAccent.withValues(alpha: 0.4)),
                   ),
                   child: const Text("Parent", style: TextStyle(color: Colors.purpleAccent, fontFamily: "Sans", fontSize: 11)),
                 ),
@@ -707,7 +707,7 @@ class _LinkParentScreenState extends State<LinkParentScreen>
                   padding: EdgeInsets.zero,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ).copyWith(
-                  foregroundColor: MaterialStateProperty.all(Colors.white),
+                  foregroundColor: WidgetStateProperty.all(Colors.white),
                 ),
                 child: Ink(
                   decoration: BoxDecoration(

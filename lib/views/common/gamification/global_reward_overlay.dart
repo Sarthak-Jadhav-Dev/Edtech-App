@@ -7,7 +7,7 @@ import '../../../../services/gamification_event_bus.dart';
 class GlobalRewardOverlay extends StatefulWidget {
   final Widget child;
 
-  const GlobalRewardOverlay({Key? key, required this.child}) : super(key: key);
+  const GlobalRewardOverlay({super.key, required this.child});
 
   @override
   State<GlobalRewardOverlay> createState() => _GlobalRewardOverlayState();
@@ -15,15 +15,15 @@ class GlobalRewardOverlay extends StatefulWidget {
 
 class _GlobalRewardOverlayState extends State<GlobalRewardOverlay> {
   late StreamSubscription _subscription;
-  List<RewardEvent> _activeToasts = [];
+  final List<RewardEvent> _activeToasts = [];
   bool _showLevelUp = false;
 
   final List<String> _motivationalPhrases = [
-    "Awesome work! 🚀",
-    "You're on fire! 🔥",
-    "Brain power +10! 🧠",
-    "Super smart! ⭐",
-    "Keep it up! 🎯",
+    "Awesome work! ",
+    "You're on fire! ",
+    "Brain power +10! ",
+    "Super smart! ",
+    "Keep it up! ",
   ];
 
   @override
@@ -119,7 +119,7 @@ class _GlobalRewardOverlayState extends State<GlobalRewardOverlay> {
                         .shimmer(duration: 1.seconds),
                     const SizedBox(height: 20),
                     const Text(
-                      "LEVEL UP! 🎉",
+                      "LEVEL UP! ðŸŽ‰",
                       style: TextStyle(
                         fontFamily: "Poppins",
                         fontSize: 48,

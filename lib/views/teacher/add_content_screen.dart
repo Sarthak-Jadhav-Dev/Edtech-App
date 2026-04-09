@@ -121,7 +121,7 @@ class _AddContentScreenState extends State<AddContentScreen> {
                    borderRadius: BorderRadius.circular(25),
                    boxShadow: [
                      BoxShadow(
-                       color: Colors.grey.withOpacity(0.2),
+                       color: Colors.grey.withValues(alpha: 0.2),
                        blurRadius: 10,
                        offset: const Offset(0, 5),
                      )
@@ -132,7 +132,7 @@ class _AddContentScreenState extends State<AddContentScreen> {
                    crossAxisAlignment: CrossAxisAlignment.stretch,
                    children: [
                      DropdownButtonFormField<String>(
-                       value: _selectedType,
+                       initialValue: _selectedType,
                        items: const [
                          DropdownMenuItem(value: 'video', child: Text("YouTube Video")),
                          DropdownMenuItem(value: 'assignment', child: Text("Google Forms Assignment")),
@@ -144,7 +144,7 @@ class _AddContentScreenState extends State<AddContentScreen> {
                          labelText: "Content Type",
                          prefixIcon: Icon(Icons.category, color: Colors.purple.shade400),
                          filled: true,
-                         fillColor: Colors.purple.shade50.withOpacity(0.5),
+                         fillColor: Colors.purple.shade50.withValues(alpha: 0.5),
                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                        ),
                      ),
@@ -155,7 +155,7 @@ class _AddContentScreenState extends State<AddContentScreen> {
                          labelText: "Title",
                          prefixIcon: Icon(Icons.title, color: Colors.purple.shade400),
                          filled: true,
-                         fillColor: Colors.purple.shade50.withOpacity(0.5),
+                         fillColor: Colors.purple.shade50.withValues(alpha: 0.5),
                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                        ),
                      ),
@@ -167,7 +167,7 @@ class _AddContentScreenState extends State<AddContentScreen> {
                          labelText: "Description",
                          prefixIcon: Icon(Icons.description, color: Colors.purple.shade400),
                          filled: true,
-                         fillColor: Colors.purple.shade50.withOpacity(0.5),
+                         fillColor: Colors.purple.shade50.withValues(alpha: 0.5),
                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                        ),
                      ),
@@ -179,7 +179,7 @@ class _AddContentScreenState extends State<AddContentScreen> {
                          labelText: _selectedType == 'video' ? "YouTube Video Link (Unlisted/Public)" : "Assignment URL Link",
                          prefixIcon: Icon(Icons.link, color: Colors.purple.shade400),
                          filled: true,
-                         fillColor: Colors.purple.shade50.withOpacity(0.5),
+                         fillColor: Colors.purple.shade50.withValues(alpha: 0.5),
                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                        ),
                      ),

@@ -85,7 +85,7 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
                   borderRadius: BorderRadius.circular(25),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
+                      color: Colors.grey.withValues(alpha: 0.2),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     )
@@ -100,7 +100,7 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
                         labelText: "Class Name",
                         prefixIcon: Icon(Icons.class_, color: Colors.purple.shade400),
                         filled: true,
-                        fillColor: Colors.purple.shade50.withOpacity(0.5),
+                        fillColor: Colors.purple.shade50.withValues(alpha: 0.5),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                       ),
                     ),
@@ -111,7 +111,7 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
                         labelText: "Subject",
                         prefixIcon: Icon(Icons.book, color: Colors.purple.shade400),
                         filled: true,
-                        fillColor: Colors.purple.shade50.withOpacity(0.5),
+                        fillColor: Colors.purple.shade50.withValues(alpha: 0.5),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                       ),
                     ),
@@ -126,7 +126,7 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
                           child: Icon(Icons.description, color: Colors.purple.shade400),
                         ),
                         filled: true,
-                        fillColor: Colors.purple.shade50.withOpacity(0.5),
+                        fillColor: Colors.purple.shade50.withValues(alpha: 0.5),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                       ),
                     ),

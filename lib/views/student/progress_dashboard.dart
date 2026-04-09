@@ -6,16 +6,21 @@ class ProgressDashboard extends StatelessWidget {
   const ProgressDashboard({super.key});
 
   String _getMotivationalText(double percentage) {
-    if (percentage == 0)
+    if (percentage == 0) {
       return "Big journey ahead! Let's start with one video today.";
-    if (percentage < 20)
+    }
+    if (percentage < 20) {
       return "Great start! Every small step counts on your learning path.";
-    if (percentage < 50)
+    }
+    if (percentage < 50) {
       return "Keep going! You're making steady progress through your courses.";
-    if (percentage < 80)
+    }
+    if (percentage < 80) {
       return "You're a star! Just a few more lessons left to completion.";
-    if (percentage < 100)
+    }
+    if (percentage < 100) {
       return "Almost there, Champion! Finish strong and claim your mastery!";
+    }
     return "Yeah Champion! You have completed everything! You are elite!";
   }
 

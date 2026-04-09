@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 class QuickReplyChips extends StatelessWidget {
   final Function(String) onSelected;
 
-  const QuickReplyChips({Key? key, required this.onSelected}) : super(key: key);
+  const QuickReplyChips({super.key, required this.onSelected});
 
   final List<String> _options = const [
     "Tell me a fun math fact!",
     "Give me a short quiz!",
-    "Tell me a story 📖",
-    "How do stars glow? ⭐",
+    "Tell me a story ðŸ“–",
+    "How do stars glow? â­",
   ];
 
   @override

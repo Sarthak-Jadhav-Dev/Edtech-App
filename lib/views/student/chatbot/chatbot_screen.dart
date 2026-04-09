@@ -8,7 +8,7 @@ import 'widgets/chat_bubble.dart';
 import 'widgets/quick_reply_chips.dart';
 
 class ChatbotScreen extends StatefulWidget {
-  const ChatbotScreen({Key? key}) : super(key: key);
+  const ChatbotScreen({super.key});
 
   @override
   State<ChatbotScreen> createState() => _ChatbotScreenState();
@@ -219,7 +219,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               decoration: BoxDecoration(
                 color: Colors.purple,
                 shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: Colors.purple.withOpacity(0.4), blurRadius: 8, offset: const Offset(0,4))],
+                boxShadow: [BoxShadow(color: Colors.purple.withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0,4))],
               ),
               child: IconButton(
                 icon: const Icon(Icons.send_rounded, color: Colors.white),

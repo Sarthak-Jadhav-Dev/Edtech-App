@@ -43,9 +43,13 @@ class AuthService {
     } on FirebaseAuthException catch (e) {
       debugPrint('Auth Error: ${e.code} - ${e.message}');
       String message = 'Registration Failed';
-      if (e.code == 'email-already-in-use') message = 'This email is already in use.';
-      else if (e.code == 'weak-password') message = 'The password is too weak.';
-      else if (e.code == 'invalid-email') message = 'The email address is invalid.';
+      if (e.code == 'email-already-in-use') {
+        message = 'This email is already in use.';
+      } else if (e.code == 'weak-password') {
+        message = 'The password is too weak.';
+      } else if (e.code == 'invalid-email') {
+        message = 'The email address is invalid.';
+      }
       throw Exception(message);
     } catch (e) {
       debugPrint('Signup Error: $e');
@@ -63,10 +67,15 @@ class AuthService {
     } on FirebaseAuthException catch (e) {
       debugPrint('Login Error: ${e.code} - ${e.message}');
       String message = 'Login Failed';
-      if (e.code == 'user-not-found') message = 'No user found with this email.';
-      else if (e.code == 'wrong-password') message = 'Incorrect password.';
-      else if (e.code == 'invalid-email') message = 'The email address is invalid.';
-      else if (e.code == 'invalid-credential') message = 'Invalid email or password.';
+      if (e.code == 'user-not-found') {
+        message = 'No user found with this email.';
+      } else if (e.code == 'wrong-password') {
+        message = 'Incorrect password.';
+      } else if (e.code == 'invalid-email') {
+        message = 'The email address is invalid.';
+      } else if (e.code == 'invalid-credential') {
+        message = 'Invalid email or password.';
+      }
       
       throw Exception(message);
     } catch (e) {

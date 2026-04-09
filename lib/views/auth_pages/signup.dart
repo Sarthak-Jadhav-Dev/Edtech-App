@@ -324,7 +324,7 @@ class _RegisterFormState extends State<RegisterForm> {
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButtonFormField<String>(
-                            value: selectedUserType,
+                            initialValue: selectedUserType,
                             items: userTypes.map((type) {
                               return DropdownMenuItem(value: type, child: Text(type, style: const TextStyle(fontFamily: 'Sans')));
                             }).toList(),

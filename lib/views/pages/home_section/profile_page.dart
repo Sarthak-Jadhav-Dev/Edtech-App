@@ -125,7 +125,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           secondary: const Icon(Icons.palette, color: Colors.black87),
                           title: const Text("Dark Mode", style: TextStyle(fontFamily: "Poppins", color: Colors.black87)),
                           value: themeMode == ThemeMode.dark,
-                          activeColor: Colors.purple,
+                          activeThumbColor: Colors.purple,
                           onChanged: (bool value) {
                             toggleTheme(value);
                           },

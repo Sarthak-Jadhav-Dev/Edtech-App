@@ -80,7 +80,7 @@ class _EnrollUserScreenState extends State<EnrollUserScreen> {
                 borderRadius: BorderRadius.circular(25),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
+                    color: Colors.grey.withValues(alpha: 0.2),
                     blurRadius: 10,
                     offset: const Offset(0, 5),
                   )
@@ -95,7 +95,7 @@ class _EnrollUserScreenState extends State<EnrollUserScreen> {
                       labelText: "Student Email",
                       prefixIcon: Icon(Icons.email, color: Colors.purple.shade400),
                       filled: true,
-                      fillColor: Colors.purple.shade50.withOpacity(0.5),
+                      fillColor: Colors.purple.shade50.withValues(alpha: 0.5),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                     ),
                   ),
