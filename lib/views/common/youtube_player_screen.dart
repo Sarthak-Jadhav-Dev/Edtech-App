@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:kte/services/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:kte/models/chat_message_model.dart';
+import 'package:kte/services/ai_service.dart';
+import 'package:kte/views/student/chatbot/widgets/chat_bubble.dart';
 class YouTubePlayerScreen extends StatefulWidget {
   final String videoId;
   final String title;
@@ -24,6 +26,12 @@ class _YouTubePlayerScreenState extends State<YouTubePlayerScreen> {
   double _lastSavedPercentage = 0;
   bool _isLoading = true;
   bool _hasResumed = false; // Prevents seeking more than once
+
+  // Chat State
+  final List<ChatMessage> _messages = [];
+  final TextEditingController _chatController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  bool _isAiTyping = false;
 
   @override
   void initState() {
@@ -109,7 +117,201 @@ class _YouTubePlayerScreenState extends State<YouTubePlayerScreen> {
     _progressTimer?.cancel();
     _saveProgress(); // Save final progress before leaving
     _controller?.dispose();
+    _chatController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  Future<void> _sendMessage(String text) async {
+    if (text.trim().isEmpty) return;
+
+    final userText = text.trim();
+    _chatController.clear();
+    FocusScope.of(context).unfocus();
+
+    setState(() {
+      _messages.insert(
+        0,
+        ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          text: userText,
+          isUser: true,
+          timestamp: DateTime.now(),
+        ),
+      );
+      _isAiTyping = true;
+    });
+    _scrollToBottom();
+
+    // Call AI Service providing the context of the video title
+    final responseText = await AiService.getResponse(
+      userText,
+      [], // Context is mainly provided via title in system instruction here
+      contextualVideoTitle: widget.title,
+    );
+
+    if (mounted) {
+      if (responseText != null) {
+        setState(() {
+          _messages.insert(
+            0,
+            ChatMessage(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              text: responseText,
+              isUser: false,
+              timestamp: DateTime.now(),
+            ),
+          );
+        });
+        _scrollToBottom();
+      }
+      setState(() {
+        _isAiTyping = false;
+      });
+    }
+  }
+
+  Widget _buildChatArea() {
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: [
+          // Chat Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.purple.shade50,
+              border: Border(bottom: BorderSide(color: Colors.purple.shade100)),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.smart_toy, color: Colors.purple, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  "Video AI Buddy",
+                  style: TextStyle(
+                    color: Colors.purple,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: "Poppins",
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Messages List
+          Expanded(
+            child: _messages.isEmpty
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24.0),
+                      child: Text(
+                        "Want a summary or notes about this video? Just ask!",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.black54,
+                          fontSize: 14,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    controller: _scrollController,
+                    reverse: true, // Newest messages at bottom
+                    padding: const EdgeInsets.all(8),
+                    itemCount: _messages.length,
+                    itemBuilder: (context, index) {
+                      return ChatBubble(message: _messages[index]);
+                    },
+                  ),
+          ),
+          
+          // Typing Indicator
+          if (_isAiTyping)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Row(
+                children: [
+                  const Icon(Icons.smart_toy, color: Colors.purple, size: 16),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Analyzing video...",
+                    style: TextStyle(
+                      color: Colors.purple.shade300,
+                      fontStyle: FontStyle.italic,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+          // Input Area
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  offset: const Offset(0, -2),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+            child: SafeArea(
+              top: false, // Ensure we don't double padd if inside safe area
+              child: Row(
+                children: [
+                   Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: TextField(
+                        controller: _chatController,
+                        style: const TextStyle(fontSize: 14),
+                        decoration: const InputDecoration(
+                          hintText: "Ask about this video...",
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          isDense: true,
+                        ),
+                        onSubmitted: _sendMessage,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.purple,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                      onPressed: () => _sendMessage(_chatController.text),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -185,7 +387,12 @@ class _YouTubePlayerScreenState extends State<YouTubePlayerScreen> {
             backgroundColor: Colors.black,
             iconTheme: const IconThemeData(color: Colors.white),
           ),
-          body: Center(child: player),
+          body: Column(
+            children: [
+              player,
+              Expanded(child: _buildChatArea()),
+            ],
+          ),
         );
       },
     );

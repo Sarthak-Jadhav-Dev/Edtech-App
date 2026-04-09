@@ -41,8 +41,21 @@ class _MyAppState extends State<MyApp> {
           darkTheme: ThemeData(
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.purpleAccent,
+              seedColor: Colors.deepPurple,
               brightness: Brightness.dark,
+              surface: const Color(0xFF1E1E2E),
+              surfaceContainerHighest: const Color(0xFF2D2D44),
+            ),
+            cardTheme: CardThemeData(
+              color: const Color(0xFF2D2D44),
+              elevation: 2,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ),
+            scaffoldBackgroundColor: const Color(0xFF12121A),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Color(0xFF1E1E2E),
+              foregroundColor: Colors.white,
+              elevation: 0,
             ),
           ),
           home: FutureBuilder(

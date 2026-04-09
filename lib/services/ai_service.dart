@@ -6,10 +6,15 @@ class AiService {
 
   static Future<String?> getResponse(
     String userMessage,
-    List<Content> chatHistory,
-  ) async {
+    List<Content> chatHistory, {
+    String? contextualVideoTitle,
+  }) async {
     try {
-      // We use gemini-1.5-flash as it is fast and supports system instructions well
+      String extraContext = contextualVideoTitle != null
+          ? "\n\nThe student is currently watching an educational video titled: '$contextualVideoTitle'. Please answer their questions referring to this video, summarize it if asked, and help them take notes on it. Keep your language encouraging."
+          : "";
+
+      // We use gemini-2.0-flash as it is fast and supports system instructions well
       final model = GenerativeModel(
         model: 'gemini-2.0-flash',
         apiKey: _apiKey,
@@ -18,7 +23,7 @@ class AiService {
           "Keep your answers brief (1-3 sentences), fun, and easy to understand. Always use emojis! "
           "If the child answers a question correctly, learns something new, or asks a super smart question, "
           "you must include the exact text '[REWARD_STAR]' somewhere in your reply to give them a star. "
-          "Do not explain what [REWARD_STAR] means, just include it naturally like: 'Great job! [REWARD_STAR]'",
+          "Do not explain what [REWARD_STAR] means, just include it naturally like: 'Great job! [REWARD_STAR]'$extraContext",
         ),
       );
 

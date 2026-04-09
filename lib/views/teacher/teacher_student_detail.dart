@@ -15,12 +15,12 @@ class TeacherStudentDetail extends StatelessWidget {
     final lastViewedTitle = progress['lastViewedTitle'] ?? "None";
     
     return Scaffold(
-      backgroundColor: Colors.purple.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("Student Progress", style: TextStyle(fontFamily: "Poppins", color: Colors.black)),
+        title: Text("Student Progress", style: TextStyle(fontFamily: "Poppins", color: Theme.of(context).colorScheme.onSurface)),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: Theme.of(context).colorScheme.onSurface),
       ),
       body: FutureBuilder<QuerySnapshot>(
         future: FirestoreService().getClassContent(classId).first,
@@ -46,8 +46,8 @@ class TeacherStudentDetail extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 15),
-                  Text("${studentData['firstName']} ${studentData['lastName']}", style: const TextStyle(fontFamily: "Poppins", fontSize: 24, fontWeight: FontWeight.bold)),
-                  Text(studentData['email'] ?? "", style: const TextStyle(fontFamily: "Sans", fontSize: 16)),
+                  Text("${studentData['firstName']} ${studentData['lastName']}", style: TextStyle(fontFamily: "Poppins", fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
+                  Text(studentData['email'] ?? "", style: TextStyle(fontFamily: "Sans", fontSize: 16, color: Theme.of(context).colorScheme.onSurface.withAlpha(153))),
                   const SizedBox(height: 20),
                   
                   Card(
@@ -58,7 +58,7 @@ class TeacherStudentDetail extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Course Completion", style: TextStyle(fontFamily: "Poppins", fontSize: 18, fontWeight: FontWeight.bold)),
+                          Text("Course Completion", style: TextStyle(fontFamily: "Poppins", fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
                           const SizedBox(height: 10),
                           LinearProgressIndicator(
                             value: percentage / 100,
@@ -68,8 +68,8 @@ class TeacherStudentDetail extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           const SizedBox(height: 10),
-                          Text("${percentage.toStringAsFixed(1)}% Completed", style: const TextStyle(fontFamily: "Sans", fontWeight: FontWeight.bold)),
-                          Text("${completedProps.length} out of $totalContents items finished.", style: const TextStyle(fontFamily: "Sans", color: Colors.black54)),
+                          Text("${percentage.toStringAsFixed(1)}% Completed", style: TextStyle(fontFamily: "Sans", fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
+                          Text("${completedProps.length} out of $totalContents items finished.", style: TextStyle(fontFamily: "Sans", color: Theme.of(context).colorScheme.onSurface.withAlpha(153))),
                         ],
                       ),
                     ),
@@ -85,23 +85,23 @@ class TeacherStudentDetail extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Recent Activity", style: TextStyle(fontFamily: "Poppins", fontSize: 18, fontWeight: FontWeight.bold)),
-                          const Divider(),
+                          Text("Recent Activity", style: TextStyle(fontFamily: "Poppins", fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
+                          Divider(color: Theme.of(context).colorScheme.onSurface.withAlpha(50)),
                           ListTile(
                             contentPadding: EdgeInsets.zero,
-                            leading: Icon(Icons.history, color: Colors.purple.shade600),
-                            title: const Text("Last Viewed Material", style: TextStyle(fontFamily: "Sans", fontWeight: FontWeight.bold)),
-                            subtitle: Text(lastViewedTitle, style: const TextStyle(fontFamily: "Sans")),
+                            leading: Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
+                            title: Text("Last Viewed Material", style: TextStyle(fontFamily: "Sans", fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
+                            subtitle: Text(lastViewedTitle, style: TextStyle(fontFamily: "Sans", color: Theme.of(context).colorScheme.onSurface.withAlpha(153))),
                           ),
                           ListTile(
                             contentPadding: EdgeInsets.zero,
-                            leading: Icon(Icons.family_restroom, color: Colors.purple.shade600),
-                            title: const Text("Linked Parents", style: TextStyle(fontFamily: "Sans", fontWeight: FontWeight.bold)),
+                            leading: Icon(Icons.family_restroom, color: Theme.of(context).colorScheme.primary),
+                            title: Text("Linked Parents", style: TextStyle(fontFamily: "Sans", fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
                             subtitle: Text(
                               (studentData['linkedParentIds'] as List?)?.isEmpty ?? true 
                                 ? "None Linked" 
                                 : "${(studentData['linkedParentIds'] as List).length} connected", 
-                              style: const TextStyle(fontFamily: "Sans")
+                              style: TextStyle(fontFamily: "Sans", color: Theme.of(context).colorScheme.onSurface.withAlpha(153))
                             ),
                           ),
                         ],

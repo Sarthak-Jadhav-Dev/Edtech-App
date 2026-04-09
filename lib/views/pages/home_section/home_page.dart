@@ -253,9 +253,9 @@ class _HomeSectionState extends State<HomeSection> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     SizedBox(
-                                      height: 60,
-                                      child: Lottie.network(
-                                        'https://lottie.host/807e38db-10a1-432d-8e68-d01c60d97b0a/8Nq25yYOPW.json',
+                                      height: 100,
+                                      child: Lottie.asset(
+                                        'assets/lottie/all_caught_up.json',
                                         fit: BoxFit.contain,
                                         errorBuilder: (context, error, stackTrace) => const Padding(
                                           padding: EdgeInsets.only(bottom: 8.0),
@@ -263,9 +263,12 @@ class _HomeSectionState extends State<HomeSection> {
                                         ),
                                       ),
                                     ),
-                                    const Text(
+                                    Text(
                                       "You're all caught up!",
-                                      style: TextStyle(fontFamily: "Sans"),
+                                      style: TextStyle(
+                                        fontFamily: "Sans",
+                                        color: Theme.of(context).colorScheme.onSurface,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -340,15 +343,16 @@ class _HomeSectionState extends State<HomeSection> {
         width: 150,
         height: 60,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
           borderRadius: BorderRadius.circular(20.0),
         ),
         child: Center(
           child: Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: "Sans",
               fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),

@@ -73,12 +73,12 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.purple.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text("Settings & Security", style: TextStyle(fontFamily: "Poppins", fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: Theme.of(context).colorScheme.onSurface),
       ),
       body: Stack(
         children: [
@@ -107,10 +107,10 @@ class _SettingsPageState extends State<SettingsPage> {
                         children: [
                           const Text("Application Security", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: "Poppins")),
                           const SizedBox(height: 15),
-                          const Text(
+                          Text(
                             "We use industry-standard encryption to protect your personal information and learning progress. Your data is securely stored in Firebase and only accessible to you and your linked parents/teachers.",
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontFamily: "Sans", color: Colors.black87),
+                            style: TextStyle(fontFamily: "Sans", color: Theme.of(context).colorScheme.onSurface.withAlpha(204)),
                           ),
                           const SizedBox(height: 25),
                           ElevatedButton(
@@ -165,7 +165,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 10, bottom: 10),
-      child: Text(title, style: TextStyle(color: Colors.purple.shade900, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.2)),
+      child: Text(title, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.2)),
     );
   }
 
@@ -188,8 +188,8 @@ class _SettingsPageState extends State<SettingsPage> {
           backgroundColor: (color ?? Colors.purple).withValues(alpha: 0.1),
           child: Icon(icon, color: color ?? Colors.purple, size: 20),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: "Sans")),
-        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "Sans", color: Theme.of(context).colorScheme.onSurface)),
+        subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withAlpha(153))),
         trailing: trailing ?? const Icon(Icons.chevron_right, size: 18),
       ),
     );

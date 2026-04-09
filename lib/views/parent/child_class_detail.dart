@@ -30,12 +30,12 @@ class ChildClassDetailScreen extends StatelessWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: Colors.purple.shade50,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          title: Text("$childName's Course", style: const TextStyle(fontFamily: "Poppins", fontSize: 18, color: Colors.black)),
-          backgroundColor: Colors.white,
+          title: Text("$childName's Course", style: TextStyle(fontFamily: "Poppins", fontSize: 18, color: Theme.of(context).colorScheme.onSurface)),
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           elevation: 1,
-          iconTheme: const IconThemeData(color: Colors.black),
+          iconTheme: IconThemeData(color: Theme.of(context).colorScheme.onSurface),
           bottom: const TabBar(
             labelColor: Colors.purple,
             indicatorColor: Colors.purple,
@@ -48,7 +48,7 @@ class ChildClassDetailScreen extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            _buildContentTab(),
+            _buildContentTab(context),
             ChildQuizInsights(classId: classId, childId: childId, childName: childName), 
           ],
         ),
@@ -56,15 +56,15 @@ class ChildClassDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildContentTab() {
+  Widget _buildContentTab(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Subject: ${classData['subject']}", style: const TextStyle(fontSize: 18, fontFamily: "Sans", fontWeight: FontWeight.bold)),
+          Text("Subject: ${classData['subject']}", style: TextStyle(fontSize: 18, fontFamily: "Sans", fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
           const SizedBox(height: 8),
-          Text("${classData['description']}", style: const TextStyle(fontFamily: "Sans", color: Colors.black54)),
+          Text("${classData['description']}", style: TextStyle(fontFamily: "Sans", color: Theme.of(context).colorScheme.onSurface.withAlpha(153))),
           const SizedBox(height: 20),
           const Divider(),
           Expanded(
@@ -94,8 +94,8 @@ class ChildClassDetailScreen extends StatelessWidget {
                           backgroundColor: Colors.purple.shade100,
                           child: Icon(isVideo ? Icons.play_circle_fill : Icons.assignment, color: Colors.purple.shade900),
                         ),
-                        title: Text(contentData['title'] ?? 'No Title', style: const TextStyle(fontFamily: "Sans", fontWeight: FontWeight.bold)),
-                        subtitle: Text(isVideo ? "Video Link" : "Assignment", style: const TextStyle(fontFamily: "Sans", fontSize: 12)),
+                        title: Text(contentData['title'] ?? 'No Title', style: TextStyle(fontFamily: "Sans", fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
+                        subtitle: Text(isVideo ? "Video Link" : "Assignment", style: TextStyle(fontFamily: "Sans", fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withAlpha(153))),
                         trailing: const Icon(Icons.open_in_browser),
                         onTap: () {
                           if (contentData['url'] != null) {

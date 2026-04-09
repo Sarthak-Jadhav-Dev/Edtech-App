@@ -30,6 +30,7 @@ class _WidgetTreeState extends State<WidgetTree> {
 
   String? userType;
   bool isLoading = true;
+  List<Map<String, dynamic>> _linkedChildren = [];
 
   @override
   void initState() {
@@ -41,22 +42,28 @@ class _WidgetTreeState extends State<WidgetTree> {
     try {
       final doc = await AuthService().getUserData();
       if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
         setState(() {
-          userType = doc['userType'];
-          isLoading = false;
+          userType = data['userType'];
         });
+        
+        // Fetch linked children for Parent users
+        if (userType == 'Parent') {
+          final childIds = (data['linkedChildIds'] as List<dynamic>?) ?? [];
+          if (childIds.isNotEmpty) {
+            _linkedChildren = await FirestoreService().getLinkedChildren(childIds);
+          }
+        }
         
         final user = FirebaseAuth.instance.currentUser;
         if (user != null && userType == 'Student') {
           // Update daily login streak asynchronously for students
           FirestoreService().updateLoginStreak(user.uid);
         }
-      } else {
-        setState(() {
-          isLoading = false;
-        });
       }
     } catch (e) {
+      debugPrint("Error fetching user data: $e");
+    } finally {
       setState(() {
         isLoading = false;
       });
@@ -104,12 +111,12 @@ class _WidgetTreeState extends State<WidgetTree> {
                       ],
                     ),
                     SizedBox(
-                      width: 60,
-                      height: 60,
-                      child: Lottie.network(
-                        'https://lottie.host/807e38db-10a1-432d-8e68-d01c60d97b0a/8Nq25yYOPW.json',
+                      width: 70,
+                      height: 70,
+                      child: Lottie.asset(
+                        'assets/lottie/drawer_header.json',
                         fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.menu_book, size: 40),
+                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.menu_book, size: 40, color: Colors.white),
                       ),
                     ),
                   ],
@@ -157,6 +164,20 @@ class _WidgetTreeState extends State<WidgetTree> {
             Navigator.pop(context);
           },
         ),
+        // Add individual child ListTiles
+        ..._linkedChildren.map((child) => ListTile(
+          contentPadding: const EdgeInsets.only(left: 40, right: 16),
+          title: Text(
+            "${child['firstName'] ?? 'Child'} ${child['lastName'] ?? ''}",
+            style: const TextStyle(fontFamily: "Sans", fontSize: 16),
+          ),
+          leading: const Icon(Icons.person, size: 20),
+          dense: true,
+          onTap: () {
+            Navigator.pop(context);
+            // Could navigate to child detail view
+          },
+        )),
       ]);
     } else {
       // Default / Student
@@ -188,23 +209,20 @@ class _WidgetTreeState extends State<WidgetTree> {
         ),
       ]);
       
-      floatingActionButton = Container(
-        margin: const EdgeInsets.only(top: 80),
-        child: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatbotScreen()));
-          },
-          backgroundColor: Colors.purple,
-          icon: SizedBox(
-            width: 30,
-            height: 30,
-            child: Lottie.network(
-              'https://lottie.host/6cfdc498-8e65-4f7f-bad5-74fbf3591c28/FIn7S1v1N1.json',
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.smart_toy, color: Colors.white),
-            ),
+      floatingActionButton = FloatingActionButton(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatbotScreen()));
+        },
+        backgroundColor: Colors.purple,
+        mini: true,
+        child: SizedBox(
+          width: 28,
+          height: 28,
+          child: Lottie.asset(
+            'assets/lottie/ai_buddy.json',
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => const Icon(Icons.smart_toy, color: Colors.white, size: 20),
           ),
-          label: const Text("AI Buddy", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
       );
     }
@@ -260,7 +278,7 @@ class _WidgetTreeState extends State<WidgetTree> {
         ),
         body: bodyWidget,
         floatingActionButton: floatingActionButton,
-        floatingActionButtonLocation: userType != 'Teacher' && userType != 'Parent' ? FloatingActionButtonLocation.endTop : null,
+        floatingActionButtonLocation: userType != 'Teacher' && userType != 'Parent' ? FloatingActionButtonLocation.endFloat : null,
       ),
     );
   }

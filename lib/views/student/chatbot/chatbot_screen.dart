@@ -78,7 +78,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.purple.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -116,9 +116,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                                 .animate(onPlay: (controller) => controller.repeat())
                                 .shakeY(duration: 2.seconds),
                             const SizedBox(height: 16),
-                            const Text(
+                            Text(
                               "Say hi to your AI Buddy!",
-                              style: TextStyle(fontSize: 18, color: Colors.black54, fontWeight: FontWeight.bold),
+                              style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onSurface.withAlpha(153), fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -144,7 +144,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                     children: [
                       const Icon(Icons.smart_toy, color: Colors.purple),
                       const SizedBox(width: 10),
-                      const Text("Buddy is typing...", style: TextStyle(color: Colors.black54, fontStyle: FontStyle.italic))
+                      Text("Buddy is typing...", style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withAlpha(153), fontStyle: FontStyle.italic))
                           .animate(onPlay: (controller) => controller.repeat())
                           .shimmer(duration: 1.seconds),
                     ],
@@ -205,8 +205,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 ),
                 child: TextField(
                   controller: _textController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: "Ask Buddy something...",
+                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withAlpha(153)),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                   ),

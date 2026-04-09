@@ -42,18 +42,22 @@ class AuthService {
       return user;
     } on FirebaseAuthException catch (e) {
       debugPrint('Auth Error: ${e.code} - ${e.message}');
-      String message = 'Registration Failed';
+      String message = 'Unable to create account. Please try again.';
       if (e.code == 'email-already-in-use') {
-        message = 'This email is already in use.';
+        message = 'This email is already registered. Please sign in or use a different email.';
       } else if (e.code == 'weak-password') {
-        message = 'The password is too weak.';
+        message = 'Password is too weak. Please use at least 6 characters with letters and numbers.';
       } else if (e.code == 'invalid-email') {
-        message = 'The email address is invalid.';
+        message = 'Please enter a valid email address (e.g., name@example.com).';
+      } else if (e.code == 'network-request-failed') {
+        message = 'No internet connection. Please check your network and try again.';
+      } else if (e.code == 'too-many-requests') {
+        message = 'Too many attempts. Please wait a moment before trying again.';
       }
       throw Exception(message);
     } catch (e) {
       debugPrint('Signup Error: $e');
-      throw Exception('An unknown error occurred.');
+      throw Exception('Something went wrong. Please try again later.');
     }
   }
 
@@ -66,21 +70,27 @@ class AuthService {
       return userCredential.user;
     } on FirebaseAuthException catch (e) {
       debugPrint('Login Error: ${e.code} - ${e.message}');
-      String message = 'Login Failed';
+      String message = 'Unable to sign in. Please try again.';
       if (e.code == 'user-not-found') {
-        message = 'No user found with this email.';
+        message = 'No account found with this email. Please sign up first.';
       } else if (e.code == 'wrong-password') {
-        message = 'Incorrect password.';
+        message = 'Incorrect password. Please try again or reset your password.';
       } else if (e.code == 'invalid-email') {
-        message = 'The email address is invalid.';
+        message = 'Please enter a valid email address (e.g., name@example.com).';
       } else if (e.code == 'invalid-credential') {
-        message = 'Invalid email or password.';
+        message = 'Invalid email or password. Please check your details and try again.';
+      } else if (e.code == 'user-disabled') {
+        message = 'This account has been disabled. Please contact support.';
+      } else if (e.code == 'network-request-failed') {
+        message = 'No internet connection. Please check your network and try again.';
+      } else if (e.code == 'too-many-requests') {
+        message = 'Too many failed attempts. Please try again later or reset your password.';
       }
       
       throw Exception(message);
     } catch (e) {
       debugPrint('Login Error: $e');
-      throw Exception('An unknown error occurred.');
+      throw Exception('Something went wrong. Please try again later.');
     }
   }
 
