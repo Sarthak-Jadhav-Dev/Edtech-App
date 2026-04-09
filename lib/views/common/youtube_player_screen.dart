@@ -19,9 +19,11 @@ class YouTubePlayerScreen extends StatefulWidget {
 }
 
 class _YouTubePlayerScreenState extends State<YouTubePlayerScreen> {
-  late YoutubePlayerController _controller;
+  YoutubePlayerController? _controller;
   Timer? _progressTimer;
   double _lastSavedPercentage = 0;
+  bool _isLoading = true;
+  bool _hasResumed = false; // Prevents seeking more than once
 
   @override
   void initState() {
@@ -33,19 +35,21 @@ class _YouTubePlayerScreenState extends State<YouTubePlayerScreen> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (uid != null) {
-      // Fetch existing progress
-      final progressSnap = await FirestoreService().getVideoProgress(uid, widget.videoId).first;
-      if (progressSnap.exists) {
-        final data = progressSnap.data() as Map<String, dynamic>;
-        final percentage = (data['watchedPercentage'] as num?)?.toDouble() ?? 0.0;
-        _lastSavedPercentage = percentage;
-        
-        // We need duration to calculate startAt position, but we don't have it yet.
-        // YouTube player will load and we can seek once ready.
+      try {
+        final progressSnap =
+            await FirestoreService().getVideoProgress(uid, widget.videoId).first;
+        if (progressSnap.exists) {
+          final data = progressSnap.data() as Map<String, dynamic>;
+          final percentage =
+              (data['watchedPercentage'] as num?)?.toDouble() ?? 0.0;
+          _lastSavedPercentage = percentage;
+        }
+      } catch (e) {
+        debugPrint('Error loading video progress: $e');
       }
     }
 
-    _controller = YoutubePlayerController(
+    final controller = YoutubePlayerController(
       initialVideoId: widget.videoId,
       flags: const YoutubePlayerFlags(
         autoPlay: true,
@@ -55,41 +59,47 @@ class _YouTubePlayerScreenState extends State<YouTubePlayerScreen> {
         forceHD: false,
         loop: false,
       ),
-    )..addListener(_listener);
+    );
 
-
-    // Start periodic tracking
-    _progressTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+    // Start periodic progress tracking
+    _progressTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       _saveProgress();
+    });
+
+    if (!mounted) {
+      controller.dispose();
+      return;
+    }
+
+    setState(() {
+      _controller = controller;
+      _isLoading = false;
     });
   }
 
-  void _listener() {
-    if (_controller.value.isReady && _lastSavedPercentage > 0 && _lastSavedPercentage < 99) {
-       // Perform initial seek if it's the first time being ready
-       // This is a bit tricky with this package, usually better to do once.
-    }
-  }
-
   Future<void> _saveProgress() async {
-    if (!_controller.value.isReady) return;
+    final controller = _controller;
+    if (controller == null || !controller.value.isReady) return;
 
-    final currentPosition = _controller.value.position.inSeconds;
-    final totalDuration = _controller.value.metaData.duration.inSeconds;
+    final currentPosition = controller.value.position.inSeconds;
+    final totalDuration = controller.value.metaData.duration.inSeconds;
 
     if (totalDuration > 0) {
       double percentage = (currentPosition / totalDuration) * 100;
       if (percentage > 100) percentage = 100;
 
-      // Only save if progress has moved significantly or it's a regular interval
       final uid = FirebaseAuth.instance.currentUser?.uid;
       if (uid != null && percentage > _lastSavedPercentage) {
-        await FirestoreService().updateVideoProgress(
-          studentId: uid,
-          videoId: widget.videoId,
-          watchedPercentage: percentage,
-        );
-        _lastSavedPercentage = percentage;
+        try {
+          await FirestoreService().updateVideoProgress(
+            studentId: uid,
+            videoId: widget.videoId,
+            watchedPercentage: percentage,
+          );
+          _lastSavedPercentage = percentage;
+        } catch (e) {
+          debugPrint('Error saving video progress: $e');
+        }
       }
     }
   }
@@ -97,25 +107,65 @@ class _YouTubePlayerScreenState extends State<YouTubePlayerScreen> {
   @override
   void dispose() {
     _progressTimer?.cancel();
-    _saveProgress();
-    _controller.dispose();
+    _saveProgress(); // Save final progress before leaving
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = _controller;
+
+    // Show loading state while the controller is being initialised
+    if (_isLoading || controller == null) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          title: Text(
+            widget.title,
+            style: const TextStyle(
+              fontFamily: "Poppins",
+              color: Colors.white,
+              fontSize: 16,
+            ),
+          ),
+          backgroundColor: Colors.black,
+          iconTheme: const IconThemeData(color: Colors.white),
+        ),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: Colors.purple),
+              SizedBox(height: 16),
+              Text(
+                'Loading Video...',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontFamily: "Sans",
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return YoutubePlayerBuilder(
       player: YoutubePlayer(
-        controller: _controller,
+        controller: controller,
         showVideoProgressIndicator: true,
         progressIndicatorColor: Colors.purple,
         onReady: () {
-          // Resume logic
-          if (_lastSavedPercentage > 0) {
-            final totalDuration = _controller.metadata.duration.inSeconds;
+          // Resume from last position – only once
+          if (!_hasResumed && _lastSavedPercentage > 0 && _lastSavedPercentage < 99) {
+            _hasResumed = true;
+            final totalDuration = controller.metadata.duration.inSeconds;
             if (totalDuration > 0) {
-              final seekTo = (totalDuration * (_lastSavedPercentage / 100)).floor();
-              _controller.seekTo(Duration(seconds: seekTo));
+              final seekTo =
+                  (totalDuration * (_lastSavedPercentage / 100)).floor();
+              controller.seekTo(Duration(seconds: seekTo));
             }
           }
         },
@@ -124,7 +174,14 @@ class _YouTubePlayerScreenState extends State<YouTubePlayerScreen> {
         return Scaffold(
           backgroundColor: Colors.black,
           appBar: AppBar(
-            title: Text(widget.title, style: const TextStyle(fontFamily: "Poppins", color: Colors.white, fontSize: 16)),
+            title: Text(
+              widget.title,
+              style: const TextStyle(
+                fontFamily: "Poppins",
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
             backgroundColor: Colors.black,
             iconTheme: const IconThemeData(color: Colors.white),
           ),

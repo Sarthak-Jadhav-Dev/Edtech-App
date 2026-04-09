@@ -44,7 +44,6 @@ class _MyAppState extends State<MyApp> {
               seedColor: Colors.purpleAccent,
               brightness: Brightness.dark,
             ),
-            scaffoldBackgroundColor: Colors.purpleAccent,
           ),
           home: FutureBuilder(
             future: AppState.isFirstTime(), 

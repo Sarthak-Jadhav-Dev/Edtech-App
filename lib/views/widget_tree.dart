@@ -11,6 +11,8 @@ import 'package:kte/views/student/chatbot/chatbot_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:kte/services/firestore_service.dart';
 import 'package:kte/views/common/gamification/global_reward_overlay.dart';
+import 'package:kte/views/common/settings_page.dart';
+import 'package:lottie/lottie.dart';
 
 class WidgetTree extends StatefulWidget {
   const WidgetTree({super.key});
@@ -24,7 +26,6 @@ class _WidgetTreeState extends State<WidgetTree> {
     fontFamily: "Sans",
     fontWeight: FontWeight.bold,
     fontSize: 20,
-    color: Colors.black,
   );
 
   String? userType;
@@ -89,11 +90,30 @@ class _WidgetTreeState extends State<WidgetTree> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  userType == 'Teacher' ? "What to Teach" : "What to Learn",
-                  style: const TextStyle(fontSize: 20, fontFamily: "Sans"),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          userType == 'Teacher' ? "What to Teach" : "What to Learn",
+                          style: const TextStyle(fontSize: 20, fontFamily: "Sans"),
+                        ),
+                        const Text("Today ?", style: TextStyle(fontSize: 25, fontFamily: "Sans")),
+                      ],
+                    ),
+                    SizedBox(
+                      width: 60,
+                      height: 60,
+                      child: Lottie.network(
+                        'https://lottie.host/807e38db-10a1-432d-8e68-d01c60d97b0a/8Nq25yYOPW.json',
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.menu_book, size: 40),
+                      ),
+                    ),
+                  ],
                 ),
-                const Text("Today ?", style: TextStyle(fontSize: 25, fontFamily: "Sans")),
                 const SizedBox(height: 20),
               ],
             ),
@@ -168,13 +188,24 @@ class _WidgetTreeState extends State<WidgetTree> {
         ),
       ]);
       
-      floatingActionButton = FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatbotScreen()));
-        },
-        backgroundColor: Colors.purple,
-        icon: const Icon(Icons.smart_toy, color: Colors.white),
-        label: const Text("AI Buddy", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      floatingActionButton = Container(
+        margin: const EdgeInsets.only(top: 80),
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatbotScreen()));
+          },
+          backgroundColor: Colors.purple,
+          icon: SizedBox(
+            width: 30,
+            height: 30,
+            child: Lottie.network(
+              'https://lottie.host/6cfdc498-8e65-4f7f-bad5-74fbf3591c28/FIn7S1v1N1.json',
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) => const Icon(Icons.smart_toy, color: Colors.white),
+            ),
+          ),
+          label: const Text("AI Buddy", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        ),
       );
     }
 
@@ -183,7 +214,9 @@ class _WidgetTreeState extends State<WidgetTree> {
         title: Text("Settings", style: textStyle),
         leading: const Icon(Icons.settings),
         splashColor: Colors.purple.shade100,
-        onTap: () {},
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage()));
+        },
       ),
       ListTile(
         title: Text("Logout", style: textStyle),
@@ -216,7 +249,6 @@ class _WidgetTreeState extends State<WidgetTree> {
               fontFamily: "Sans",
               fontWeight: FontWeight.bold,
               fontSize: 20,
-              color: Colors.black,
             ),
           ),
           centerTitle: true,
@@ -228,6 +260,7 @@ class _WidgetTreeState extends State<WidgetTree> {
         ),
         body: bodyWidget,
         floatingActionButton: floatingActionButton,
+        floatingActionButtonLocation: userType != 'Teacher' && userType != 'Parent' ? FloatingActionButtonLocation.endTop : null,
       ),
     );
   }

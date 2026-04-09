@@ -7,6 +7,7 @@ import '../../student/class_detail_screen.dart';
 import '../../student/assignment_view_screen.dart';
 import '../../student/progress_dashboard.dart';
 import 'shared_components.dart';
+import 'package:lottie/lottie.dart';
 
 class HomeSection extends StatefulWidget {
   const HomeSection({super.key});
@@ -18,15 +19,21 @@ class HomeSection extends StatefulWidget {
 class _HomeSectionState extends State<HomeSection> {
   final String uid = FirebaseAuth.instance.currentUser?.uid ?? '';
   String searchQuery = "";
-  late final Future<DocumentSnapshot> _userDataFuture = AuthService().getUserData();
-  late final Stream<QuerySnapshot> _classesStream = FirestoreService().getEnrolledClasses(uid, 'Student');
+  late final Future<DocumentSnapshot> _userDataFuture = AuthService()
+      .getUserData();
+  late final Stream<QuerySnapshot> _classesStream = FirestoreService()
+      .getEnrolledClasses(uid, 'Student');
 
   @override
   void initState() {
     super.initState();
   }
 
-  Widget _buildClassCard(Map<String, dynamic> classData, String classId, BuildContext context) {
+  Widget _buildClassCard(
+    Map<String, dynamic> classData,
+    String classId,
+    BuildContext context,
+  ) {
     return Container(
       width: 220,
       margin: const EdgeInsets.only(right: 15),
@@ -37,9 +44,15 @@ class _HomeSectionState extends State<HomeSection> {
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
           onTap: () {
-            Navigator.push(context, MaterialPageRoute(
-              builder: (_) => StudentClassDetailScreen(classId: classId, classData: classData)
-            ));
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => StudentClassDetailScreen(
+                  classId: classId,
+                  classData: classData,
+                ),
+              ),
+            );
           },
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -53,7 +66,11 @@ class _HomeSectionState extends State<HomeSection> {
                 const Spacer(),
                 Text(
                   classData['name'] ?? 'Unnamed',
-                  style: const TextStyle(fontFamily: "Poppins", fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontFamily: "Poppins",
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -72,7 +89,10 @@ class _HomeSectionState extends State<HomeSection> {
     );
   }
 
-  Widget _buildAssignmentCard(Map<String, dynamic> assignment, BuildContext context) {
+  Widget _buildAssignmentCard(
+    Map<String, dynamic> assignment,
+    BuildContext context,
+  ) {
     return Container(
       width: 220,
       margin: const EdgeInsets.only(right: 15),
@@ -83,13 +103,16 @@ class _HomeSectionState extends State<HomeSection> {
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
           onTap: () {
-            Navigator.push(context, MaterialPageRoute(
-              builder: (_) => AssignmentViewScreen(
-                classId: assignment['classId'],
-                contentId: assignment['id'],
-                assignmentData: assignment,
-              )
-            ));
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => AssignmentViewScreen(
+                  classId: assignment['classId'],
+                  contentId: assignment['id'],
+                  assignmentData: assignment,
+                ),
+              ),
+            );
           },
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -103,14 +126,22 @@ class _HomeSectionState extends State<HomeSection> {
                 const Spacer(),
                 Text(
                   assignment['title'] ?? 'Assignment',
-                  style: const TextStyle(fontFamily: "Poppins", fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontFamily: "Poppins",
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 5),
                 Text(
                   "Due soon", // For demo purposes as there is no due date in DB yet
-                  style: const TextStyle(fontFamily: "Sans", fontSize: 12, color: Colors.red),
+                  style: const TextStyle(
+                    fontFamily: "Sans",
+                    fontSize: 12,
+                    color: Colors.red,
+                  ),
                 ),
               ],
             ),
@@ -137,7 +168,7 @@ class _HomeSectionState extends State<HomeSection> {
           child: Column(
             children: [
               DashboardHeader(
-                userData: userData, 
+                userData: userData,
                 greetingPrefix: "Welcome back",
                 onSearchChanged: (val) {
                   setState(() {
@@ -145,14 +176,17 @@ class _HomeSectionState extends State<HomeSection> {
                   });
                 },
               ),
-              
+
               StreamBuilder<QuerySnapshot>(
                 stream: _classesStream,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                     return const Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator());
+                    return const Padding(
+                      padding: EdgeInsets.all(20),
+                      child: CircularProgressIndicator(),
+                    );
                   }
-                  
+
                   final allClasses = snapshot.data?.docs ?? [];
                   final classes = allClasses.where((doc) {
                     if (searchQuery.isEmpty) return true;
@@ -168,7 +202,10 @@ class _HomeSectionState extends State<HomeSection> {
                       if (classes.isEmpty)
                         const Padding(
                           padding: EdgeInsets.all(20.0),
-                          child: Text("You are not enrolled in any courses yet.", style: TextStyle(fontFamily: "Sans")),
+                          child: Text(
+                            "You are not enrolled in any courses yet.",
+                            style: TextStyle(fontFamily: "Sans"),
+                          ),
                         )
                       else
                         SizedBox(
@@ -179,7 +216,11 @@ class _HomeSectionState extends State<HomeSection> {
                             itemCount: classes.length,
                             itemBuilder: (context, index) {
                               final doc = classes[index];
-                              return _buildClassCard(doc.data() as Map<String, dynamic>, doc.id, context);
+                              return _buildClassCard(
+                                doc.data() as Map<String, dynamic>,
+                                doc.id,
+                                context,
+                              );
                             },
                           ),
                         ),
@@ -188,38 +229,69 @@ class _HomeSectionState extends State<HomeSection> {
                       if (classes.isEmpty)
                         const Padding(
                           padding: EdgeInsets.all(20.0),
-                          child: Text("No pending assignments.", style: TextStyle(fontFamily: "Sans")),
+                          child: Text(
+                            "No pending assignments.",
+                            style: TextStyle(fontFamily: "Sans"),
+                          ),
                         )
                       else
                         FutureBuilder<List<Map<String, dynamic>>>(
-                          future: FirestoreService().getPendingAssignments(uid, classIds),
+                          future: FirestoreService().getPendingAssignments(
+                            uid,
+                            classIds,
+                          ),
                           builder: (context, assignSnapshot) {
-                            if (assignSnapshot.connectionState == ConnectionState.waiting) {
+                            if (assignSnapshot.connectionState ==
+                                ConnectionState.waiting) {
                               return const CircularProgressIndicator();
                             }
                             final assignments = assignSnapshot.data ?? [];
                             if (assignments.isEmpty) {
-                              return const Padding(
-                                padding: EdgeInsets.all(20.0),
-                                child: Text("You're all caught up!", style: TextStyle(fontFamily: "Sans")),
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      height: 60,
+                                      child: Lottie.network(
+                                        'https://lottie.host/807e38db-10a1-432d-8e68-d01c60d97b0a/8Nq25yYOPW.json',
+                                        fit: BoxFit.contain,
+                                        errorBuilder: (context, error, stackTrace) => const Padding(
+                                          padding: EdgeInsets.only(bottom: 8.0),
+                                          child: Icon(Icons.check_circle, size: 40, color: Colors.green),
+                                        ),
+                                      ),
+                                    ),
+                                    const Text(
+                                      "You're all caught up!",
+                                      style: TextStyle(fontFamily: "Sans"),
+                                    ),
+                                  ],
+                                ),
                               );
                             }
                             return SizedBox(
                               height: 140,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
                                 itemCount: assignments.length,
                                 itemBuilder: (context, index) {
-                                  return _buildAssignmentCard(assignments[index], context);
+                                  return _buildAssignmentCard(
+                                    assignments[index],
+                                    context,
+                                  );
                                 },
                               ),
                             );
-                          }
+                          },
                         ),
                     ],
                   );
-                }
+                },
               ),
 
               SectionHeader(title: "Quick Links"),
@@ -229,10 +301,21 @@ class _HomeSectionState extends State<HomeSection> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _buildQuickLinkButton(context, "Live Classes", () {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Coming Soon! Live sessions integration is in progress.")));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "Coming Soon! Live sessions integration is in progress.",
+                          ),
+                        ),
+                      );
                     }),
                     _buildQuickLinkButton(context, "Progress", () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const ProgressDashboard()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ProgressDashboard(),
+                        ),
+                      );
                     }),
                   ],
                 ),
@@ -241,11 +324,15 @@ class _HomeSectionState extends State<HomeSection> {
             ],
           ),
         );
-      }
+      },
     );
   }
 
-  Widget _buildQuickLinkButton(BuildContext context, String text, VoidCallback onTap) {
+  Widget _buildQuickLinkButton(
+    BuildContext context,
+    String text,
+    VoidCallback onTap,
+  ) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20.0),
@@ -259,7 +346,10 @@ class _HomeSectionState extends State<HomeSection> {
         child: Center(
           child: Text(
             text,
-            style: const TextStyle(fontFamily: "Sans", fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontFamily: "Sans",
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),

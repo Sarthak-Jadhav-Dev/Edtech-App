@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lottie/lottie.dart';
 
 class ChildQuizInsights extends StatelessWidget {
   final String classId;
@@ -33,15 +34,22 @@ class ChildQuizInsights extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.analytics_outlined,
-                  size: 80,
-                  color: Colors.purple.shade200,
+                SizedBox(
+                  height: 150,
+                  child: Lottie.network(
+                    'https://lottie.host/807e38db-10a1-432d-8e68-d01c60d97b0a/8Nq25yYOPW.json',
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => Icon(
+                      Icons.analytics_outlined,
+                      size: 80,
+                      color: Colors.purple.shade200,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 const Text(
                   "No quizzes taken yet.",
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                  style: TextStyle(fontSize: 18, color: Colors.grey, fontFamily: "Sans"),
                 ),
               ],
             ),
