@@ -29,9 +29,7 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Name and Subject are required.')));
       return;
     }
-
     setState(() => _isLoading = true);
-    
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid != null) {
       final id = await FirestoreService().createClass(
@@ -131,9 +129,7 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
                       ),
                     ),
                     const SizedBox(height: 40),
-                    _isLoading
-                        ? const CircularProgressIndicator()
-                        : ElevatedButton(
+                    _isLoading ? const CircularProgressIndicator() : ElevatedButton(
                             onPressed: _createClass,
                             style: ElevatedButton.styleFrom(
                               minimumSize: const Size(double.infinity, 55),

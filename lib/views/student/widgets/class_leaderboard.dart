@@ -62,14 +62,22 @@ class ClassLeaderboard extends StatelessWidget {
                 final name = "${student['firstName'] ?? 'Student'} ${student['lastName'] ?? ''}".trim();
 
                 Color badgeColor;
-                if (index == 0) { badgeColor = Colors.amber; }
-                else if (index == 1) { badgeColor = Colors.grey.shade400; }
-                else if (index == 2) { badgeColor = Colors.brown.shade300; }
-                else { badgeColor = Colors.blue.shade200; }
+                if (index == 0){ 
+                  badgeColor = Colors.amber; 
+                }
+                else if (index == 1){ 
+                  badgeColor = Colors.grey.shade400; 
+                }
+                else if (index == 2){ 
+                  badgeColor = Colors.brown.shade300;
+                }
+                else { 
+                  badgeColor = Colors.blue.shade200; 
+                }
 
                 return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  margin: EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: isMe ? Colors.purple.shade50 : Colors.grey.shade50,
                     borderRadius: BorderRadius.circular(15),

@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:flutter/foundation.dart';
 
 class AiQuizEvaluator {
   static const String _apiKey = 'AIzaSyAgAPcL2ITodk_UnfL4-ezpAi1mYURBl3o';
@@ -27,14 +27,7 @@ class AiQuizEvaluator {
         ),
       );
 
-      final promptText = """
-Analyze this quiz attempt:
-Score: $score out of ${questions.length}
-Time elapsed: $timeSeconds seconds
-
-Questions and Answers context:
-${_formatQuizData(questions, studentAnswers)}
-""";
+      final promptText = """Analyze this quiz attempt:Score: $score out of ${questions.length}Time elapsed: $timeSeconds seconds Questions and Answers context: ${_formatQuizData(questions, studentAnswers)}""";
 
       final content = [Content.text(promptText)];
       final response = await model.generateContent(content);
@@ -51,7 +44,6 @@ ${_formatQuizData(questions, studentAnswers)}
         jsonString = jsonString.replaceAll("```", "");
         jsonString = jsonString.trim();
       }
-
       return jsonDecode(jsonString) as Map<String, dynamic>;
     } catch (e) {
       debugPrint("Error generating AI insights: $e");

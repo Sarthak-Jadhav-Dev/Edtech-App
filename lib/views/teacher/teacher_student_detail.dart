@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kte/services/firestore_service.dart';
+import 'package:kte/views/common/personalized_ai_report_screen.dart';
 
 class TeacherStudentDetail extends StatelessWidget {
   final String classId;
@@ -50,6 +51,27 @@ class TeacherStudentDetail extends StatelessWidget {
                   Text(studentData['email'] ?? "", style: TextStyle(fontFamily: "Sans", fontSize: 16, color: Theme.of(context).colorScheme.onSurface.withAlpha(153))),
                   const SizedBox(height: 20),
                   
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (_) => PersonalizedAiReportScreen(
+                          studentId: studentData['uid'] ?? '',
+                          studentName: "${studentData['firstName']} ${studentData['lastName']}",
+                          classId: classId,
+                        ),
+                      ));
+                    },
+                    icon: const Icon(Icons.auto_awesome),
+                    label: const Text("Generate AI Holistic Report", style: TextStyle(fontFamily: "Poppins", fontWeight: FontWeight.bold)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.purple.shade600,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
                   Card(
                     elevation: 4,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

@@ -62,8 +62,9 @@ class _WidgetTreeState extends State<WidgetTree> {
         }
       }
     } catch (e) {
-      debugPrint("Error fetching user data: $e");
-    } finally {
+      // Ignore error
+    } 
+    finally {
       setState(() {
         isLoading = false;
       });
@@ -73,20 +74,17 @@ class _WidgetTreeState extends State<WidgetTree> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
-
     Widget bodyWidget;
     Widget? floatingActionButton;
     List<Widget> drawerItems = [];
-
-    // Base header for Drawer
     Widget drawerHeader = DrawerHeader(
       decoration: BoxDecoration(color: Colors.purple.shade300),
       child: Padding(
-        padding: const EdgeInsets.all(0.1),
+        padding: EdgeInsets.all(0.1),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.purple.shade100,
@@ -140,7 +138,6 @@ class _WidgetTreeState extends State<WidgetTree> {
         },
       )
     );
-
     if (userType == 'Teacher') {
       bodyWidget = const TeacherDashboard();
       drawerItems.addAll([
@@ -164,7 +161,6 @@ class _WidgetTreeState extends State<WidgetTree> {
             Navigator.pop(context);
           },
         ),
-        // Add individual child ListTiles
         ..._linkedChildren.map((child) => ListTile(
           contentPadding: const EdgeInsets.only(left: 40, right: 16),
           title: Text(
@@ -175,12 +171,10 @@ class _WidgetTreeState extends State<WidgetTree> {
           dense: true,
           onTap: () {
             Navigator.pop(context);
-            // Could navigate to child detail view
           },
         )),
       ]);
     } else {
-      // Default / Student
       bodyWidget = const Home();
       drawerItems.addAll([
         ListTile(
@@ -241,11 +235,11 @@ class _WidgetTreeState extends State<WidgetTree> {
         leading: const Icon(Icons.logout),
         splashColor: Colors.purple.shade100,
         onTap: () async {
-          Navigator.of(context).pop(); // Close drawer
+          Navigator.of(context).pop();
           try {
             await AuthService().logout();
           } catch (e) {
-            debugPrint("Logout error: $e");
+            // Ignore error
           }
           if (context.mounted) {
             Navigator.pushAndRemoveUntil(

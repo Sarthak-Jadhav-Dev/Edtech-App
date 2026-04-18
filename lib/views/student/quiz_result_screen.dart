@@ -10,16 +10,7 @@ class QuizResultScreen extends StatelessWidget {
   final List<Map<String, dynamic>> questions;
   final List<int> selectedAnswers;
 
-  const QuizResultScreen({
-    super.key,
-    required this.score,
-    required this.totalQuestions,
-    required this.percentage,
-    required this.xpEarned,
-    required this.isPerfect,
-    required this.questions,
-    required this.selectedAnswers,
-  });
+  const QuizResultScreen({super.key, required this.score, required this.totalQuestions, required this.percentage, required this.xpEarned, required this.isPerfect, required this.questions, required this.selectedAnswers});
 
   IconData _getBadgeIcon() {
     if (isPerfect) return Icons.emoji_events;

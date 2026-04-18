@@ -30,7 +30,11 @@ class QuizResultsScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.inbox, size: 60, color: Colors.grey),
+                  Icon(
+                    Icons.inbox, 
+                    size: 60, 
+                    color: Colors.grey,
+                  ),
                   SizedBox(height: 10),
                   Text("No submissions yet.", style: TextStyle(fontFamily: "Sans", fontSize: 16, color: Colors.grey)),
                 ],

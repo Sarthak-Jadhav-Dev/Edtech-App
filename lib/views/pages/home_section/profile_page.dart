@@ -73,9 +73,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           backgroundColor: Colors.purple.shade100,
                           child: Icon(Icons.person, size: 50, color: Colors.purple),
                         ),
-
                         const SizedBox(height: 10),
-
                         Text(
                           "${data['firstName']} ${data['lastName']}",
                           style: TextStyle(

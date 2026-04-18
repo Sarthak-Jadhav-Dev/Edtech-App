@@ -58,6 +58,7 @@ class AchievementsScreen extends StatelessWidget {
           final quizzesTaken = (data['quizzesTaken'] as int?) ?? 0;
           final perfectScores = (data['perfectScores'] as int?) ?? 0;
           final badges = List<Map<String, dynamic>>.from(data['badges'] ?? []);
+          final currentStreak = (data['currentStreak'] as int?) ?? 0;
           final xpProgress = xp % 100;
 
           return SingleChildScrollView(
@@ -123,18 +124,23 @@ class AchievementsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
                 // Stats Row
                 Row(
                   children: [
-                    Expanded(child: _buildStatCard("Quizzes", "$quizzesTaken", Icons.quiz, Colors.blue)),
-                    const SizedBox(width: 10),
-                    Expanded(child: _buildStatCard("Perfect", "$perfectScores", Icons.star, Colors.amber)),
+                    Expanded(
+                      child: _buildStatCard("Quizzes", "$quizzesTaken", Icons.quiz, Colors.blue),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildStatCard("Perfect", "$perfectScores", Icons.star, Colors.amber),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildStatCard("Streak", "$currentStreak", Icons.local_fire_department, Colors.deepOrange),
+                    ),
                   ],
                 ),
-
                 const SizedBox(height: 25),
 
                 // Badges Section
@@ -162,13 +168,14 @@ class AchievementsScreen extends StatelessWidget {
                 else
                   GridView.builder(
                     shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),//this reduce conflick of gridview ans singlechlscrol
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       childAspectRatio: 1.3,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
                     ),
+                    // we have used gridDelegateWithFixedCrossAxisCount to create a grid of badges
                     itemCount: badges.length,
                     itemBuilder: (context, index) {
                       final badge = badges[index];
@@ -180,7 +187,10 @@ class AchievementsScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             gradient: LinearGradient(
-                              colors: [_getBadgeColor(iconName).withValues(alpha: 0.1), _getBadgeColor(iconName).withValues(alpha: 0.05)],
+                              colors: [
+                                _getBadgeColor(iconName).withValues(alpha: 0.1),
+                                _getBadgeColor(iconName).withValues(alpha: 0.05),
+                              ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
@@ -211,13 +221,13 @@ class AchievementsScreen extends StatelessWidget {
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
         child: Column(
           children: [
-            Icon(icon, size: 30, color: color),
-            const SizedBox(height: 8),
-            Text(value, style: const TextStyle(fontFamily: "Poppins", fontSize: 24, fontWeight: FontWeight.bold)),
-            Text(title, style: TextStyle(fontFamily: "Sans", fontSize: 13, color: Colors.grey.shade600)),
+            Icon(icon, size: 28, color: color),
+            const SizedBox(height: 6),
+            Text(value, style: const TextStyle(fontFamily: "Poppins", fontSize: 22, fontWeight: FontWeight.bold)),
+            Text(title, style: TextStyle(fontFamily: "Sans", fontSize: 12, color: Colors.grey.shade600)),
           ],
         ),
       ),

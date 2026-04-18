@@ -8,8 +8,8 @@ class QuickReplyChips extends StatelessWidget {
   final List<String> _options = const [
     "Tell me a fun math fact!",
     "Give me a short quiz!",
-    "Tell me a story ðŸ“–",
-    "How do stars glow? â­",
+    "Tell me a story ",
+    "How do stars glow?",
   ];
 
   @override
@@ -27,7 +27,10 @@ class QuickReplyChips extends StatelessWidget {
             child: ActionChip(
               label: Text(
                 option,
-                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.indigo,
+                ),
               ),
               backgroundColor: Colors.white,
               elevation: 2,

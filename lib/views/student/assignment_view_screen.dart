@@ -157,9 +157,7 @@ class _AssignmentViewScreenState extends State<AssignmentViewScreen> {
                           minimumSize: const Size(double.infinity, 55),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         ),
-                        child: _isSubmitting
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text("Mark as Done", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        child: _isSubmitting ? const CircularProgressIndicator(color: Colors.white) : const Text("Mark as Done", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                       ),
                   ],
                 ),

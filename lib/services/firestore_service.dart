@@ -441,23 +441,64 @@ class FirestoreService {
       final enrolledStudentIds = List<String>.from((classDoc.data() as Map<String, dynamic>)['enrolledStudents'] ?? []);
       if (enrolledStudentIds.isEmpty) return [];
 
-      // Fetch progress
-      final progressQs = await _db.collection('classes').doc(classId).collection('student_progress').get();
-      final progressMap = {for (var doc in progressQs.docs) doc.id: doc.data()};
+      // Fetch class content to map properly
+      final contentQs = await _db.collection('classes').doc(classId).collection('content').get();
 
       // Fetch student users
       final userQs = await _db.collection('users').where(FieldPath.documentId, whereIn: enrolledStudentIds.take(10).toList()).get();
       
       for (var doc in userQs.docs) {
         final userData = doc.data();
-        final pgData = progressMap[doc.id] ?? {};
+        final uid = doc.id;
+
+        // Fetch actual progress directly
+        final videoProgressQs = await _db.collection('users').doc(uid).collection('progress').get();
+        final completedVideos = videoProgressQs.docs.where((d) => (d.data())['completed'] == true).map((d) => d.id).toSet();
+        
+        final submissionQs = await _db.collection('users').doc(uid).collection('submissions').get();
+        final completedAssignments = submissionQs.docs.where((d) => (d.data())['status'] == 'completed').map((d) => d.id).toSet();
+
+        List<String> completedIds = [];
+        String lastViewed = "None";
+        Timestamp? latestTime;
+
+        for (var content in contentQs.docs) {
+          final data = content.data();
+          bool isComplete = false;
+          
+          if (data['type'] == 'video' && data['videoId'] != null) {
+            final vId = data['videoId'];
+            if (completedVideos.contains(vId)) {
+              isComplete = true;
+            }
+            // Track last watched
+            final vDoc = videoProgressQs.docs.where((d) => d.id == vId).firstOrNull;
+            if (vDoc != null) {
+              final lw = (vDoc.data())['lastWatchedAt'] as Timestamp?;
+              if (lw != null && (latestTime == null || lw.compareTo(latestTime) > 0)) {
+                latestTime = lw;
+                lastViewed = data['title'] ?? 'Video';
+              }
+            }
+          } else if (data['type'] == 'assignment' && completedAssignments.contains(content.id)) {
+             isComplete = true;
+          }
+
+          if (isComplete) {
+            completedIds.add(content.id);
+          }
+        }
+
         studentsData.add({
-          'uid': doc.id,
+          'uid': uid,
           'firstName': userData['firstName'],
           'lastName': userData['lastName'],
           'email': userData['email'],
           'linkedParentIds': userData['linkedParentIds'] ?? [],
-          'progress': pgData,
+          'progress': {
+            'completedContentIds': completedIds,
+            'lastViewedTitle': lastViewed,
+          },
         });
       }
       return studentsData;
@@ -757,5 +798,50 @@ class FirestoreService {
 
   Stream<DocumentSnapshot> getUserStream(String userId) {
     return _db.collection('users').doc(userId).snapshots();
+  }
+
+  // --- Doubts System ---
+
+  Future<bool> submitVideoDoubt({
+    required String classId,
+    required String studentId,
+    required String videoId,
+    required String videoTitle,
+    required String doubtText,
+    required String subject,
+  }) async {
+    try {
+      await _db.collection('classes').doc(classId).collection('doubts').add({
+        'studentId': studentId,
+        'videoId': videoId,
+        'videoTitle': videoTitle,
+        'doubtText': doubtText,
+        'subject': subject,
+        'createdAt': FieldValue.serverTimestamp(),
+        'isResolved': false,
+      });
+      return true;
+    } catch (e) {
+      debugPrint("Error submitting doubt: $e");
+      return false;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getStudentDoubtStats(String studentId, List<String> classIds) async {
+    try {
+      List<Map<String, dynamic>> allDoubts = [];
+      for (String cId in classIds) {
+        final qs = await _db.collection('classes').doc(cId).collection('doubts')
+            .where('studentId', isEqualTo: studentId)
+            .get();
+        for (var doc in qs.docs) {
+          allDoubts.add(doc.data());
+        }
+      }
+      return allDoubts;
+    } catch (e) {
+      debugPrint("Error fetching doubt stats: $e");
+      return [];
+    }
   }
 }

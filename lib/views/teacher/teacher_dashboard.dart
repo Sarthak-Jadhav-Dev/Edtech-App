@@ -163,7 +163,9 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
                     
                     final allClasses = snapshot.data?.docs.toList() ?? [];
                     final classes = allClasses.where((doc) {
-                      if (searchQuery.isEmpty) return true;
+                      if (searchQuery.isEmpty) {
+                        return true;
+                      }
                       final data = doc.data() as Map<String, dynamic>;
                       final name = (data['name'] ?? '').toString().toLowerCase();
                       return name.contains(searchQuery);

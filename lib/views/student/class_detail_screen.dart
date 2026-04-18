@@ -69,7 +69,6 @@ class StudentClassDetailScreen extends StatelessWidget {
                         Text("${classData['description']}", style: const TextStyle(fontFamily: "Sans", color: Colors.black54)),
                         const SizedBox(height: 15),
 
-                        // Progress Card
                         Card(
                           elevation: 4,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -98,9 +97,7 @@ class StudentClassDetailScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 10),
-
                         const SizedBox(height: 10),
-
                         const SizedBox(height: 15),
                         // Quizzes Section
                         const Text("Quizzes", style: TextStyle(fontSize: 18, fontFamily: "Poppins", fontWeight: FontWeight.bold)),
@@ -220,6 +217,8 @@ class StudentClassDetailScreen extends StatelessWidget {
                                                       builder: (_) => YouTubePlayerScreen(
                                                         videoId: videoId,
                                                         title: contentData['title'] ?? 'Video',
+                                                        classId: classId,
+                                                        subject: classData['subject'] ?? 'General',
                                                       )
                                                     ));
                                                   } else {

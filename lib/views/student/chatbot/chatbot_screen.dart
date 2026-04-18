@@ -22,13 +22,18 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
   void _triggerReward() {
     setState(() => _showRewardAnimation = true);
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) setState(() => _showRewardAnimation = false);
-    });
+    Future.delayed(
+      const Duration(seconds: 3),
+      () {
+        if (mounted) setState(() => _showRewardAnimation = false);
+      },
+    );
   }
 
   Future<void> _sendMessage(String text) async {
-    if (text.trim().isEmpty) return;
+    if (text.trim().isEmpty) {
+      return;
+    }
 
     final userText = text.trim();
     _textController.clear();
@@ -36,7 +41,6 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
     setState(() => _isLoading = true);
 
-    // Save user message to Firestore
     final defaultId = FirebaseFirestore.instance.collection('_').doc().id;
     final userMessage = ChatMessage(
       id: defaultId,
@@ -46,10 +50,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     );
     await _firestoreService.saveMessage(userMessage);
 
-    // Request AI response
-    // Optionally fetch recent messages from stream here to build History
     final aiResponseText = await AiService.getResponse(userText, []);
-
     if (aiResponseText != null) {
       bool isReward = aiResponseText.contains('[REWARD_STAR]');
 
@@ -62,14 +63,11 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         isReward: isReward,
         rewardAmount: isReward ? 10 : 0,
       );
-
       await _firestoreService.saveMessage(botMessage);
-
       if (isReward) {
         _triggerReward();
       }
     }
-
     if (mounted) {
       setState(() => _isLoading = false);
     }
@@ -83,8 +81,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Safe fallback icon if lottie network fails
-            const Icon(Icons.smart_toy, color: Colors.purple),
+            const Icon(
+              Icons.smart_toy,
+              color: Colors.purple,
+            ),
             const SizedBox(width: 10),
             const Text(
               "AI Buddy",
@@ -112,9 +112,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.waving_hand, size: 64, color: Colors.purple.shade300)
-                                .animate(onPlay: (controller) => controller.repeat())
-                                .shakeY(duration: 2.seconds),
+                            Icon(Icons.waving_hand, size: 64, color: Colors.purple.shade300).animate(onPlay: (controller) => controller.repeat()).shakeY(duration: 2.seconds),
                             const SizedBox(height: 16),
                             Text(
                               "Say hi to your AI Buddy!",
@@ -127,9 +125,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
                     final messages = snapshot.data!;
                     return ListView.builder(
-                      reverse: true, // List is reversed
+                      reverse: true,
                       itemCount: messages.length,
-                      padding: const EdgeInsets.all(8.0),
+                      padding: EdgeInsets.all(8.0),
                       itemBuilder: (context, index) {
                         return ChatBubble(message: messages[index]);
                       },
@@ -139,14 +137,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               ),
               if (_isLoading)
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: EdgeInsets.all(8.0),
                   child: Row(
                     children: [
                       const Icon(Icons.smart_toy, color: Colors.purple),
                       const SizedBox(width: 10),
-                      Text("Buddy is typing...", style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withAlpha(153), fontStyle: FontStyle.italic))
-                          .animate(onPlay: (controller) => controller.repeat())
-                          .shimmer(duration: 1.seconds),
+                      Text("Buddy is typing...", style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withAlpha(153), fontStyle: FontStyle.italic)).animate(onPlay: (controller) => controller.repeat()).shimmer(duration: 1.seconds),
                     ],
                   ),
                 ),
@@ -162,11 +158,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.star, size: 120, color: Colors.amber)
-                        .animate()
-                        .scale(begin: const Offset(0.5, 0.5), end: const Offset(1.2, 1.2), duration: 500.ms, curve: Curves.elasticOut)
-                        .then()
-                        .shake(duration: 500.ms),
+                    const Icon(Icons.star, size: 120, color: Colors.amber).animate().scale(begin: const Offset(0.5, 0.5), end: const Offset(1.2, 1.2), duration: 500.ms, curve: Curves.elasticOut).then().shake(duration: 500.ms),
                     const SizedBox(height: 20),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -191,7 +183,11 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
-          BoxShadow(color: Colors.grey.shade200, offset: const Offset(0, -2), blurRadius: 4),
+          BoxShadow(
+            color: Colors.grey.shade200,
+            offset: Offset(0, -2),
+            blurRadius: 4,
+          ),
         ],
       ),
       child: SafeArea(
@@ -215,15 +211,24 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Container(
               decoration: BoxDecoration(
                 color: Colors.purple,
                 shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: Colors.purple.withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0,4))],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.purple.withValues(alpha: 0.4),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: IconButton(
-                icon: const Icon(Icons.send_rounded, color: Colors.white),
+                icon: Icon(
+                  Icons.send_rounded,
+                  color: Colors.white,
+                ),
                 onPressed: () => _sendMessage(_textController.text),
               ),
             ),

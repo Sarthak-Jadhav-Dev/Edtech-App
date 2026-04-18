@@ -45,9 +45,7 @@ class ProgressDashboard extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          final stats =
-              snapshot.data ??
-              {'total': 0, 'completed': 0, 'percentage': 0.0, 'classCount': 0};
+          final stats = snapshot.data ?? {'total': 0, 'completed': 0, 'percentage': 0.0, 'classCount': 0};
           final percentage = (stats['percentage'] as num).toDouble();
           final completed = stats['completed'] as int;
           final total = stats['total'] as int;
@@ -182,14 +180,8 @@ class ProgressDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatTile(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color, {
-    bool fullWidth = false,
-  }) {
+  Widget _buildStatTile(BuildContext context, String title, String value,
+      IconData icon, Color color, {bool fullWidth = false}) {
     return Container(
       padding: const EdgeInsets.all(20),
       // width: fullWidth ? double.infinity : null,
@@ -205,9 +197,8 @@ class ProgressDashboard extends StatelessWidget {
         ],
       ),
       child: Column(
-        crossAxisAlignment: fullWidth
-            ? CrossAxisAlignment.center
-            : CrossAxisAlignment.start,
+        crossAxisAlignment:
+            fullWidth ? CrossAxisAlignment.center : CrossAxisAlignment.start,
         children: [
           CircleAvatar(
             backgroundColor: color.withValues(alpha: 0.1),

@@ -9,11 +9,15 @@ import 'package:kte/views/student/chatbot/widgets/chat_bubble.dart';
 class YouTubePlayerScreen extends StatefulWidget {
   final String videoId;
   final String title;
+  final String classId;
+  final String subject;
 
   const YouTubePlayerScreen({
     super.key,
     required this.videoId,
     required this.title,
+    required this.classId,
+    required this.subject,
   });
 
   @override
@@ -130,6 +134,54 @@ class _YouTubePlayerScreenState extends State<YouTubePlayerScreen> {
         curve: Curves.easeOut,
       );
     }
+  }
+
+  void _showDoubtDialog(BuildContext context) {
+    final TextEditingController doubtController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Ask your Teacher", style: TextStyle(fontFamily: "Poppins", fontSize: 18)),
+          content: TextField(
+            controller: doubtController,
+            maxLines: 3,
+            decoration: const InputDecoration(
+              hintText: "What are you confused about in this video?",
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final doubt = doubtController.text.trim();
+                if (doubt.isNotEmpty) {
+                  final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+                  await FirestoreService().submitVideoDoubt(
+                    classId: widget.classId,
+                    studentId: uid,
+                    videoId: widget.videoId,
+                    videoTitle: widget.title,
+                    doubtText: doubt,
+                    subject: widget.subject,
+                  );
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Doubt sent to teacher!")));
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple, foregroundColor: Colors.white),
+              child: const Text("Submit"),
+            ),
+          ],
+        );
+      }
+    );
   }
 
   Future<void> _sendMessage(String text) async {
@@ -392,6 +444,12 @@ class _YouTubePlayerScreenState extends State<YouTubePlayerScreen> {
               player,
               Expanded(child: _buildChatArea()),
             ],
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () => _showDoubtDialog(context),
+            backgroundColor: Colors.orange.shade600,
+            icon: const Icon(Icons.help_outline, color: Colors.white),
+            label: const Text("Ask Teacher", style: TextStyle(color: Colors.white, fontFamily: "Poppins", fontWeight: FontWeight.bold)),
           ),
         );
       },

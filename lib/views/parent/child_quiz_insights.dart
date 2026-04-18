@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lottie/lottie.dart';
+import 'package:kte/services/firestore_service.dart';
+import 'package:kte/views/common/personalized_ai_report_screen.dart';
 
 class ChildQuizInsights extends StatelessWidget {
   final String classId;
@@ -61,6 +63,80 @@ class ChildQuizInsights extends StatelessWidget {
       debugPrint('Error fetching video progress: $e');
       return {'totalVideos': 0, 'watchedVideos': 0, 'percentage': 0.0};
     }
+  }
+
+  Widget _buildHolisticReportButton(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: () {
+        Navigator.push(context, MaterialPageRoute(
+          builder: (_) => PersonalizedAiReportScreen(
+            studentId: childId,
+            studentName: childName,
+            classId: classId,
+          ),
+        ));
+      },
+      icon: const Icon(Icons.auto_awesome),
+      label: const Text("Generate AI Holistic Report", style: TextStyle(fontFamily: "Poppins", fontWeight: FontWeight.bold)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.purple.shade600,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      ),
+    );
+  }
+
+  Widget _buildDoubtsCard(BuildContext context) {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: FirestoreService().getStudentDoubtStats(childId, [classId]),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        final doubts = snapshot.data!;
+        final Map<String, int> subjectCounts = {};
+        for(var d in doubts) {
+            String sub = d['subject'] ?? 'General';
+             subjectCounts[sub] = (subjectCounts[sub] ?? 0) + 1;
+        }
+
+        return Card(
+          elevation: 3,
+          margin: const EdgeInsets.only(bottom: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text("Student Doubts 🙋", style: TextStyle(fontFamily: "Poppins", fontSize: 18, fontWeight: FontWeight.bold, color: Colors.purple.shade800)),
+                const SizedBox(height: 10),
+                Text("Total Doubts Asked: ${doubts.length}", style: const TextStyle(fontFamily: "Sans", fontWeight: FontWeight.bold)),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: subjectCounts.entries.map((e) => Chip(
+                     avatar: const CircleAvatar(backgroundColor: Colors.purple, child: Icon(Icons.question_mark, size: 12, color: Colors.white)),
+                     label: Text("${e.key}: ${e.value}"),
+                     backgroundColor: Colors.purple.shade50,
+                  )).toList(),
+                ),
+                const SizedBox(height: 10),
+                const Text("Recent Doubts:", style: TextStyle(fontFamily: "Sans", fontWeight: FontWeight.bold, fontSize: 13)),
+                ...doubts.take(3).map((d) => ListTile(
+                   contentPadding: EdgeInsets.zero,
+                   leading: const Icon(Icons.play_circle_fill, color: Colors.grey),
+                   title: Text(d['videoTitle'] ?? 'Video', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                   subtitle: Text(d['doubtText'] ?? '', style: const TextStyle(fontSize: 12), maxLines: 2, overflow: TextOverflow.ellipsis),
+                )),
+              ],
+            ),
+          )
+        );
+      }
+    );
   }
 
   Widget _buildVideoProgressCard(Map<String, dynamic> stats, int totalQuizzes) {
@@ -224,6 +300,9 @@ class ChildQuizInsights extends StatelessWidget {
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
+                  _buildHolisticReportButton(context),
+                  const SizedBox(height: 16),
+                  _buildDoubtsCard(context),
                   _buildVideoProgressCard(videoStats, 0),
                 ],
               );
@@ -241,7 +320,15 @@ class ChildQuizInsights extends StatelessWidget {
               itemCount: results.length + 1, // +1 for the summary card
               itemBuilder: (context, index) {
                 if (index == 0) {
-                  return _buildVideoProgressCard(videoStats, totalQuizzes);
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildHolisticReportButton(context),
+                      const SizedBox(height: 16),
+                      _buildDoubtsCard(context),
+                      _buildVideoProgressCard(videoStats, totalQuizzes),
+                    ],
+                  );
                 }
                 
                 final data = results[index - 1].data() as Map<String, dynamic>;

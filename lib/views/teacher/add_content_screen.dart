@@ -185,9 +185,7 @@ class _AddContentScreenState extends State<AddContentScreen> {
                      ),
                      
                      const SizedBox(height: 40),
-                     _isLoading
-                         ? const Center(child: CircularProgressIndicator())
-                         : ElevatedButton(
+                     _isLoading ? const Center(child: CircularProgressIndicator()): ElevatedButton(
                              onPressed: _addContent,
                              style: ElevatedButton.styleFrom(
                                minimumSize: const Size(double.infinity, 55),
